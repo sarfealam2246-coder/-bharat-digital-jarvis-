@@ -5,7 +5,14 @@ import urllib.parse
 from pathlib import Path
 from PIL import Image, ImageDraw
 
-from ai_departments import generate_poster_image, load_memory, load_skill_for_category, run_department
+from ai_departments import (
+    estimate_market_rate,
+    generate_poster_image,
+    load_memory,
+    load_skill_for_category,
+    run_department,
+    verify_html_integrity,
+)
 
 ROOT = Path(__file__).resolve().parent.parent
 DOCS_DIR = ROOT / "docs"
@@ -112,7 +119,8 @@ Return ONLY JSON:
 
 
 def validate_html_gate(html_str: str, is_final: bool) -> bool:
-    if "<html" not in html_str or "</html>" not in html_str:
+    ok_int, _ = verify_html_integrity(html_str)
+    if not ok_int:
         return False
     if not is_final and "SAMPLE DEMO • LOCKED" not in html_str:
         return False
@@ -123,6 +131,10 @@ def build_demo_page(lead: dict, base_pages_url: str, is_final: bool = False) -> 
     slug = lead.get("slug") or slugify(f"{lead.get('name')}-{lead.get('city', 'in')}")
     out_dir = DEMOS_DIR / slug
     out_dir.mkdir(parents=True, exist_ok=True)
+
+    pricing = estimate_market_rate(lead.get("category", ""), lead.get("name", ""), lead.get("customRequest", ""))
+    offer_inr = lead.get("offerPriceInr") or pricing["offerPriceInr"]
+    market_rate = lead.get("marketRateInr") or pricing["marketRateInr"]
 
     copy = build_demo_copy(lead)
     banner_path = out_dir / "banner.png"
@@ -204,7 +216,7 @@ def build_demo_page(lead: dict, base_pages_url: str, is_final: bool = False) -> 
       {qr_section}
       <div class="card" id="contact-box">
         <strong>इस वेबसाइट को अपने नंबर के साथ फाइनल करवाएँ:</strong>
-        <p class="muted">सीधा ऑर्डर या बदलाव भेजने के लिए नीचे क्लिक करें:</p>
+        <p class="muted">मार्केट रेट: {html.escape(str(market_rate))} • हमारा डायरेक्ट सेटअप ऑफर: <strong>₹{offer_inr}</strong> (मोलभाव के लिए बात करें)</p>
         <a class="btn-mail" href="mailto:{html.escape(bot_email)}?subject={urllib.parse.quote('Website Order: ' + lead.get('name', ''))}&body={urllib.parse.quote('Namaste, mujhe apni website (' + demo_url + ') final karwani hai. Mera phone number: ')}">📩 ईमेल से ऑर्डर / बदलाव भेजें</a>
       </div>
     </div>
@@ -213,7 +225,7 @@ def build_demo_page(lead: dict, base_pages_url: str, is_final: bool = False) -> 
 </html>"""
     assert validate_html_gate(page_html, is_final), "HTML quality gate failed!"
     (out_dir / "index.html").write_text(page_html, encoding="utf-8")
-    return {"slug": slug, "demoUrl": demo_url, "qrUrl": f"{demo_url}qr.png"}
+    return {"slug": slug, "demoUrl": demo_url, "qrUrl": f"{demo_url}qr.png", "offerPriceInr": offer_inr, "marketRateInr": market_rate}
 
 
 def build_upi_payment_page(lead: dict, amount_inr: int, upi_id: str, base_pages_url: str) -> str:
