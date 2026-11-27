@@ -100,5 +100,29 @@
     "lead": "Frameszon",
     "approved": true,
     "reason": "Rule pass"
+  },
+  {
+    "ts": "2026-11-27T15:18:31.931260+00:00",
+    "lead": "Rasoie",
+    "approved": true,
+    "reason": "Rule pass"
+  },
+  {
+    "ts": "2026-11-27T15:18:31.954220+00:00",
+    "lead": "Cross Roads Restaurant",
+    "approved": true,
+    "reason": "Rule pass"
+  },
+  {
+    "ts": "2026-11-27T15:18:31.976968+00:00",
+    "lead": "Lotus The Food City",
+    "approved": true,
+    "reason": "Rule pass"
+  },
+  {
+    "ts": "2026-11-27T15:18:31.999728+00:00",
+    "lead": "Mohan plastics",
+    "approved": true,
+    "reason": "Rule pass"
   }
 ]
