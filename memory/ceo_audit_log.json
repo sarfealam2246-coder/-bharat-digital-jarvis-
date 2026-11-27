@@ -532,5 +532,29 @@
     "lead": "109 Cafe",
     "approved": true,
     "reason": "Rule pass"
+  },
+  {
+    "ts": "2026-11-27T18:17:10.530575+00:00",
+    "lead": "Brahmananda Narayana Clinic",
+    "approved": true,
+    "reason": "Rule pass"
+  },
+  {
+    "ts": "2026-11-27T18:17:10.547306+00:00",
+    "lead": "Indro Car Service Garage",
+    "approved": true,
+    "reason": "Rule pass"
+  },
+  {
+    "ts": "2026-11-27T18:17:10.563661+00:00",
+    "lead": "Paras Store",
+    "approved": true,
+    "reason": "Rule pass"
+  },
+  {
+    "ts": "2026-11-27T18:17:10.577945+00:00",
+    "lead": "चांदनी मैडिकोस",
+    "approved": true,
+    "reason": "Rule pass"
   }
 ]
