@@ -1,0 +1,57 @@
+name: Agent 1 Relay (North & West India + APK Actions)
+
+on:
+  schedule:
+    - cron: '0,20,40 * * * *'
+  workflow_dispatch:
+    inputs:
+      apk_action:
+        required: false
+        default: ''
+      apk_target_id:
+        required: false
+        default: ''
+      apk_amount:
+        required: false
+        default: '1499'
+
+permissions:
+  contents: write
+
+concurrency:
+  group: repo-write
+  cancel-in-progress: false
+
+jobs:
+  agent-1:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+      - run: sudo apt-get update && sudo apt-get install -y ffmpeg
+      - run: pip install -r scripts/requirements.txt
+      - name: Run Agent 1 & Jarvis Audio Brief
+        env:
+          AGENT_SHIFT: agent1
+          APK_ACTION: ${{ github.event.inputs.apk_action }}
+          APK_TARGET_ID: ${{ github.event.inputs.apk_target_id }}
+          APK_AMOUNT: ${{ github.event.inputs.apk_amount }}
+          NVIDIA_API_KEY: ${{ secrets.NVIDIA_API_KEY }}
+          GROQ_API_KEY: ${{ secrets.GROQ_API_KEY }}
+          GEMINI_API_KEY: ${{ secrets.GEMINI_API_KEY }}
+          CLOUDFLARE_ACCOUNT_ID: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
+          CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+          CLOUD_SINGLE_API_KEY: ${{ secrets.CLOUD_SINGLE_API_KEY }}
+          GMAIL_ADDRESS: ${{ secrets.GMAIL_ADDRESS }}
+          GMAIL_APP_PASSWORD: ${{ secrets.GMAIL_APP_PASSWORD }}
+          MY_UPI_ID: ${{ secrets.MY_UPI_ID }}
+          GH_AUTO_PAT: ${{ secrets.GH_AUTO_PAT }}
+        run: python scripts/agent_runner.py
+      - name: Commit Memory & Demos Safely
+        run: |
+          git config user.name "Bharat Digital Bot"
+          git config user.email "bot@users.noreply.github.com"
+          git add docs/ memory/
+          git diff --staged --quiet || (git pull --rebase --autostash && git commit -m "chore: agent 1 relay update" && git push)
