@@ -2,6 +2,7 @@ import React, { useEffect, useMemo, useRef, useState } from 'react';
 import {
   BarChart3,
   Check,
+  CheckCircle2,
   ChevronDown,
   ChevronUp,
   ExternalLink,
@@ -28,7 +29,12 @@ import {
   saveReports,
   saveVault
 } from './services/localMemory';
-import { pullCloudState, syncVaultToGitHub, triggerWorkflowAction } from './services/githubSync';
+import {
+  draftSmartReplyInApk,
+  pullCloudState,
+  syncVaultToGitHub,
+  triggerWorkflowAction
+} from './services/githubSync';
 import { DealItem, LeadItem, LiveStatus, RunReport, VaultKeys } from './types/jarvis';
 
 type Tab = 'jarvis' | 'leads' | 'vault';
@@ -44,7 +50,6 @@ export default function App() {
   const [toast, setToast] = useState<string>('');
   const [busy, setBusy] = useState<boolean>(false);
 
-  // Foldable accordion states
   const [openSections, setOpenSections] = useState<Record<string, boolean>>({
     jarvisPanel: true,
     graphCity: true,
@@ -56,6 +61,7 @@ export default function App() {
     vaultComms: false
   });
   const [expandedLead, setExpandedLead] = useState<string | null>(null);
+  const [replyInputs, setReplyInputs] = useState<Record<string, string>>({});
   const [cornerOpen, setCornerOpen] = useState<boolean>(false);
   const audioRef = useRef<HTMLAudioElement | null>(null);
 
@@ -85,23 +91,24 @@ export default function App() {
     })();
   }, []);
 
+  const speakText = (script: string) => {
+    if ('speechSynthesis' in window) {
+      window.speechSynthesis.cancel();
+      const u = new SpeechSynthesisUtterance(script);
+      u.lang = 'hi-IN';
+      window.speechSynthesis.speak(u);
+    }
+  };
+
   const speakJarvis = () => {
     const script =
       liveStatus?.jarvisScript ||
       `नमस्ते सर, मैं जार्विस बोल रहा हूँ। अभी आपके पास ${leads.filter((x) => x.status === 'NEW').length} नए क्लाइंट डेमो और ${deals.filter((x) => x.status === 'PENDING_APPROVAL').length} पेंडिंग डील हैं।`;
     if (jarvisUrl && audioRef.current) {
       audioRef.current.src = jarvisUrl;
-      audioRef.current.play().catch(() => {
-        if ('speechSynthesis' in window) {
-          const u = new SpeechSynthesisUtterance(script);
-          u.lang = 'hi-IN';
-          window.speechSynthesis.speak(u);
-        }
-      });
-    } else if ('speechSynthesis' in window) {
-      const u = new SpeechSynthesisUtterance(script);
-      u.lang = 'hi-IN';
-      window.speechSynthesis.speak(u);
+      audioRef.current.play().catch(() => speakText(script));
+    } else {
+      speakText(script);
     }
     notify('Jarvis हिंदी रिपोर्ट सुना रहा है...');
   };
@@ -111,10 +118,12 @@ export default function App() {
     try {
       const cloud = await pullCloudState(vault);
       if (cloud.leads.length > 0) {
-        // Merge without deleting user's permanently stored local records
         const map = new Map<string, LeadItem>();
         leads.forEach((x) => map.set(x.slug, x));
-        cloud.leads.forEach((x) => map.set(x.slug, x));
+        cloud.leads.forEach((x) => {
+          const prev = map.get(x.slug);
+          map.set(x.slug, prev ? { ...x, clientReplyText: prev.clientReplyText || x.clientReplyText, jarvisReplyDraft: prev.jarvisReplyDraft || x.jarvisReplyDraft } : x);
+        });
         const merged = Array.from(map.values());
         setLeads(merged);
         await saveLeads(merged);
@@ -171,23 +180,52 @@ export default function App() {
     notify('क्लाइंट रिकॉर्ड हटाया गया।');
   };
 
-  const handleCornerTickLead = async (lead: LeadItem) => {
+  const openWhatsAppWithText = (lead: LeadItem, text: string) => {
     const digits = (lead.phone || '').replace(/\D/g, '');
     const waPhone = digits.length === 10 ? `91${digits}` : digits;
     if (waPhone) {
-      window.open(`https://wa.me/${waPhone}?text=${encodeURIComponent(lead.pitchMessage)}`, '_blank');
+      window.open(`https://wa.me/${waPhone}?text=${encodeURIComponent(text)}`, '_blank');
     } else if (lead.postUrl) {
       window.open(lead.postUrl, '_blank');
+    } else {
+      notify('इस क्लाइंट का WhatsApp नंबर उपलब्ध नहीं है — ईमेल या डेमो लिंक इस्तेमाल करें।');
     }
+  };
+
+  const handleSendWhatsAppLead = async (lead: LeadItem) => {
+    openWhatsAppWithText(lead, lead.pitchMessage);
     const updated = leads.map((l) => (l.slug === lead.slug ? { ...l, status: 'SENT' as const } : l));
     setLeads(updated);
     await saveLeads(updated);
     try {
-      await triggerWorkflowAction(vault, lead.email ? 'send_email' : 'mark_sent', lead.slug, '1499');
+      const price = String(lead.offerPriceInr || lead.amountInr || 2999);
+      await triggerWorkflowAction(vault, 'mark_sent', lead.slug, price);
     } catch {
-      // Saved locally in IndexedDB even if offline
+      // Saved locally in IndexedDB
     }
-    notify(`${lead.name} को भेजा गया (SENT)!`);
+    notify(`${lead.name} के लिए WhatsApp खोला गया!`);
+  };
+
+  const handleSendEmailLead = async (lead: LeadItem) => {
+    if (!lead.email) {
+      notify('इस क्लाइंट का ईमेल उपलब्ध नहीं है।');
+      return;
+    }
+    const subject = `${lead.name} के लिए तैयार वेबसाइट डेमो (${lead.city})`;
+    window.open(
+      `mailto:${encodeURIComponent(lead.email)}?subject=${encodeURIComponent(subject)}&body=${encodeURIComponent(lead.pitchMessage)}`,
+      '_blank'
+    );
+    const updated = leads.map((l) => (l.slug === lead.slug ? { ...l, status: 'SENT' as const } : l));
+    setLeads(updated);
+    await saveLeads(updated);
+    try {
+      const price = String(lead.offerPriceInr || lead.amountInr || 2999);
+      await triggerWorkflowAction(vault, 'send_email', lead.slug, price);
+    } catch {
+      // Saved locally in IndexedDB
+    }
+    notify(`${lead.name} को ईमेल भेजा जा रहा है!`);
   };
 
   const handleCornerSkipLead = async (lead: LeadItem) => {
@@ -197,9 +235,58 @@ export default function App() {
     notify(`${lead.name} को छोड़ा गया।`);
   };
 
+  const handleSaveClientReply = async (lead: LeadItem) => {
+    const txt = (replyInputs[lead.slug] || '').trim();
+    if (!txt) {
+      notify('पहले क्लाइंट का WhatsApp रिप्लाई पेस्ट करें।');
+      return;
+    }
+    setBusy(true);
+    try {
+      const draft = await draftSmartReplyInApk(vault, lead, txt);
+      const updated = leads.map((l) =>
+        l.slug === lead.slug ? { ...l, clientReplyText: txt, jarvisReplyDraft: draft } : l
+      );
+      setLeads(updated);
+      await saveLeads(updated);
+      speakText(`सर, ${lead.name} का जवाब सेव हो गया है। मैंने अगला जवाब तैयार कर दिया है।`);
+      notify('Jarvis ने क्लाइंट के रिप्लाई के हिसाब से नया जवाब तैयार कर दिया!');
+    } finally {
+      setBusy(false);
+    }
+  };
+
+  const handleMarkPaidUnlock = async (lead: LeadItem) => {
+    const defaultAmt = lead.offerPriceInr || lead.amountInr || 2999;
+    const raw = window.prompt(`${lead.name} से कितने रुपये (₹) मिले?`, String(defaultAmt));
+    if (!raw) return;
+    const amt = parseInt(raw.replace(/\D/g, ''), 10) || defaultAmt;
+    setBusy(true);
+    try {
+      await triggerWorkflowAction(vault, 'unlock_and_upi', lead.slug, String(amt));
+      const updated = leads.map((l) =>
+        l.slug === lead.slug ? { ...l, status: 'PAID' as const, amountInr: amt } : l
+      );
+      setLeads(updated);
+      await saveLeads(updated);
+      if (liveStatus) {
+        const nextLs = { ...liveStatus, totalEarnedInr: (liveStatus.totalEarnedInr || 0) + amt };
+        setLiveStatus(nextLs);
+        await saveLiveStatus(nextLs);
+      }
+      speakText(`बधाई हो सर! ${lead.name} से ${amt} रुपये मिले, डेमो अनलॉक हो रहा है।`);
+      notify(`₹${amt} दर्ज! डेमो अनलॉक होने के लिए GitHub पर भेजा गया।`);
+    } catch (e: unknown) {
+      notify(e instanceof Error ? e.message : 'Unlock trigger failed');
+    } finally {
+      setBusy(false);
+    }
+  };
+
   const handleApproveDeal = async (deal: DealItem, mode: 'approve_reply' | 'approve_deal_upi' | 'cancel_deal') => {
     try {
-      await triggerWorkflowAction(vault, mode, deal.id, '1499');
+      const amt = String(deal.amountInr || 2999);
+      await triggerWorkflowAction(vault, mode, deal.id, amt);
       const nextStatus = mode === 'cancel_deal' ? 'CANCELLED' : mode === 'approve_deal_upi' ? 'PAID' : 'REPLIED';
       const updated = deals.map((d) => (d.id === deal.id ? { ...d, status: nextStatus as DealItem['status'] } : d));
       setDeals(updated);
@@ -210,7 +297,6 @@ export default function App() {
     }
   };
 
-  // Graph aggregations
   const cityCounts = useMemo(() => {
     const m: Record<string, number> = {};
     leads.forEach((l) => {
@@ -235,7 +321,6 @@ export default function App() {
     <div className="min-h-screen bg-[#F0F2F5] text-[#1C1E21] pb-24">
       <audio ref={audioRef} className="hidden" />
 
-      {/* Top Facebook-Style Clean White Header */}
       <header className="sticky top-0 z-20 bg-white border-b border-gray-300 px-4 py-3 flex items-center justify-between">
         <div>
           <h1 className="text-lg font-extrabold text-[#1877F2]">Bharat Digital Jarvis</h1>
@@ -264,7 +349,6 @@ export default function App() {
         </div>
       )}
 
-      {/* Navigation Tabs */}
       <nav className="bg-white border-b border-gray-300 px-3 py-2 flex gap-2">
         {[
           { id: 'jarvis', label: 'Jarvis & ग्राफ' },
@@ -284,10 +368,8 @@ export default function App() {
       </nav>
 
       <main className="p-4 max-w-2xl mx-auto space-y-3">
-        {/* TAB 1: JARVIS & GRAPHS */}
         {tab === 'jarvis' && (
           <>
-            {/* Summary KPIs */}
             <div className="grid grid-cols-3 gap-2">
               <div className="bg-white border border-gray-300 rounded-xl p-3 text-center">
                 <div className="text-xs text-gray-500 font-semibold">कुल डेमो</div>
@@ -303,7 +385,6 @@ export default function App() {
               </div>
             </div>
 
-            {/* Foldable Jarvis Voice Panel */}
             <div className="bg-white border border-gray-300 rounded-xl overflow-hidden">
               <button
                 onClick={() => toggleSec('jarvisPanel')}
@@ -330,7 +411,7 @@ export default function App() {
                       onClick={async () => {
                         setBusy(true);
                         try {
-                          await triggerWorkflowAction(vault, '', '', '1499');
+                          await triggerWorkflowAction(vault, '', '', '2999');
                           notify('Agent 1 अभी चालू हो गया! 1–2 मिनट बाद Sync दबाएँ।');
                         } catch (e: unknown) {
                           notify(e instanceof Error ? e.message : 'Run error');
@@ -347,7 +428,6 @@ export default function App() {
               )}
             </div>
 
-            {/* Foldable City Graph */}
             <div className="bg-white border border-gray-300 rounded-xl overflow-hidden">
               <button
                 onClick={() => toggleSec('graphCity')}
@@ -382,7 +462,6 @@ export default function App() {
               )}
             </div>
 
-            {/* Foldable Category Graph */}
             <div className="bg-white border border-gray-300 rounded-xl overflow-hidden">
               <button
                 onClick={() => toggleSec('graphCat')}
@@ -417,7 +496,6 @@ export default function App() {
               )}
             </div>
 
-            {/* Foldable Always-Report History */}
             <div className="bg-white border border-gray-300 rounded-xl overflow-hidden">
               <button
                 onClick={() => toggleSec('runReports')}
@@ -444,7 +522,6 @@ export default function App() {
           </>
         )}
 
-        {/* TAB 2: FOLDABLE LEADS & PERMANENT MEMORY */}
         {tab === 'leads' && (
           <div className="space-y-2.5">
             {leads.length === 0 ? (
@@ -454,6 +531,7 @@ export default function App() {
             ) : (
               leads.map((l) => {
                 const isOpen = expandedLead === l.slug;
+                const price = l.offerPriceInr || l.amountInr || 2999;
                 return (
                   <div key={l.slug} className="bg-white border border-gray-300 rounded-xl overflow-hidden">
                     <button
@@ -462,24 +540,74 @@ export default function App() {
                     >
                       <div>
                         <div className="font-bold text-sm text-[#1C1E21]">{l.name}</div>
-                        <div className="text-xs text-gray-500">{l.city} • {l.category} • <span className="font-bold text-[#1877F2]">{l.status}</span></div>
+                        <div className="text-xs text-gray-500">
+                          {l.city} • {l.category} • <span className="font-bold text-[#42B72A]">₹{price}</span> •{' '}
+                          <span className="font-bold text-[#1877F2]">{l.status}</span>
+                        </div>
                       </div>
                       {isOpen ? <ChevronUp className="w-4 h-4" /> : <ChevronDown className="w-4 h-4" />}
                     </button>
                     {isOpen && (
-                      <div className="px-4 pb-4 border-t border-gray-200 pt-3 space-y-2 text-xs">
+                      <div className="px-4 pb-4 border-t border-gray-200 pt-3 space-y-2.5 text-xs">
+                        <div className="flex flex-wrap gap-2 text-xs text-gray-700">
+                          {l.phone && <span className="bg-[#F0F2F5] px-2 py-1 rounded">📞 {l.phone}</span>}
+                          {l.email && <span className="bg-[#F0F2F5] px-2 py-1 rounded">✉️ {l.email}</span>}
+                          {l.marketRateInr && <span className="bg-[#F0F2F5] px-2 py-1 rounded">मार्केट रेट: {l.marketRateInr}</span>}
+                        </div>
+
                         <p className="text-[#1C1E21]"><strong>हिंदी सारांश:</strong> {l.hindiSummary}</p>
                         <p className="bg-[#F0F2F5] p-2.5 rounded-lg text-gray-700">{l.pitchMessage}</p>
+
                         <div className="flex flex-wrap gap-2 pt-1">
                           <a href={l.demoUrl} target="_blank" rel="noreferrer" className="bg-[#1877F2] text-white font-bold px-3 py-2 rounded-lg flex items-center gap-1">
-                            <ExternalLink className="w-3.5 h-3.5" /> लॉक डेमो देखें
+                            <ExternalLink className="w-3.5 h-3.5" /> डेमो देखें
                           </a>
-                          <button onClick={() => handleCornerTickLead(l)} className="bg-[#42B72A] text-white font-bold px-3 py-2 rounded-lg flex items-center gap-1">
-                            <Check className="w-3.5 h-3.5" /> भेजें
+                          {(l.phone || l.postUrl) && (
+                            <button onClick={() => handleSendWhatsAppLead(l)} className="bg-[#42B72A] text-white font-bold px-3 py-2 rounded-lg flex items-center gap-1">
+                              <Check className="w-3.5 h-3.5" /> WhatsApp खोलें
+                            </button>
+                          )}
+                          {l.email && (
+                            <button onClick={() => handleSendEmailLead(l)} className="bg-[#1877F2] text-white font-bold px-3 py-2 rounded-lg flex items-center gap-1">
+                              <Mail className="w-3.5 h-3.5" /> Email भेजें
+                            </button>
+                          )}
+                          <button onClick={() => handleMarkPaidUnlock(l)} className="bg-amber-600 text-white font-bold px-3 py-2 rounded-lg flex items-center gap-1">
+                            <CheckCircle2 className="w-3.5 h-3.5" /> पेमेंट मिला (Unlock)
                           </button>
                           <button onClick={() => handleDeleteLead(l.slug)} className="bg-red-600 text-white font-bold px-3 py-2 rounded-lg flex items-center gap-1">
                             <Trash2 className="w-3.5 h-3.5" /> Delete
                           </button>
+                        </div>
+
+                        <div className="bg-[#F0F2F5] border border-gray-300 rounded-lg p-2.5 space-y-2 mt-2">
+                          <div className="font-bold text-[#1877F2]">📋 क्लाइंट का WhatsApp रिप्लाई यहाँ डालें</div>
+                          <textarea
+                            rows={2}
+                            value={replyInputs[l.slug] ?? l.clientReplyText ?? ''}
+                            onChange={(e) => setReplyInputs({ ...replyInputs, [l.slug]: e.target.value })}
+                            placeholder="क्लाइंट ने WhatsApp पर जो लिखा, यहाँ Paste करें..."
+                            className="w-full bg-white border border-gray-300 rounded-lg p-2 text-xs text-[#1C1E21]"
+                          />
+                          <button
+                            onClick={() => handleSaveClientReply(l)}
+                            disabled={busy}
+                            className="w-full bg-[#1877F2] text-white font-bold py-2 rounded-lg"
+                          >
+                            🤖 Jarvis को बताएँ व अगला जवाब बनवाएँ
+                          </button>
+                          {l.jarvisReplyDraft && (
+                            <div className="bg-white border border-gray-300 rounded-lg p-2 space-y-1.5">
+                              <div className="font-bold text-[#42B72A]">Jarvis का तैयार जवाब:</div>
+                              <p className="text-gray-800">{l.jarvisReplyDraft}</p>
+                              <button
+                                onClick={() => openWhatsAppWithText(l, l.jarvisReplyDraft || '')}
+                                className="bg-[#42B72A] text-white font-bold px-3 py-1.5 rounded-lg"
+                              >
+                                📱 यह नया जवाब WhatsApp पर भेजें
+                              </button>
+                            </div>
+                          )}
                         </div>
                       </div>
                     )}
@@ -490,7 +618,6 @@ export default function App() {
           </div>
         )}
 
-        {/* TAB 3: FOLDABLE 10-CARD VAULT */}
         {tab === 'vault' && (
           <div className="space-y-3">
             <button
@@ -501,27 +628,23 @@ export default function App() {
               {busy ? 'Sync हो रहा है...' : '🔄 Sync All 10 Keys to GitHub Secrets'}
             </button>
 
-            {/* Foldable Group 1: GitHub */}
             <VaultGroup title="1. GitHub कनेक्शन (PAT व Repo)" open={openSections.vaultGithub} onToggle={() => toggleSec('vaultGithub')}>
               <KeyCard label="GitHub PAT Token" value={vault.githubPat} onChange={(val) => setVault({ ...vault, githubPat: val })} onSave={(val) => handleSaveSingleKey('githubPat', val, 'GitHub PAT')} secret />
               <KeyCard label="GitHub Repo (owner/repo)" value={vault.githubRepo} onChange={(val) => setVault({ ...vault, githubRepo: val })} onSave={(val) => handleSaveSingleKey('githubRepo', val, 'GitHub Repo')} />
             </VaultGroup>
 
-            {/* Foldable Group 2: AI Keys */}
             <VaultGroup title="2. मुख्य AI Keys (NVIDIA, Gemini, Groq)" open={openSections.vaultAi} onToggle={() => toggleSec('vaultAi')}>
               <KeyCard label="NVIDIA Master API Key (34+ AI)" value={vault.nvidiaKey} onChange={(val) => setVault({ ...vault, nvidiaKey: val })} onSave={(val) => handleSaveSingleKey('nvidiaKey', val, 'NVIDIA Key')} secret />
               <KeyCard label="Gemini API Key" value={vault.geminiKey} onChange={(val) => setVault({ ...vault, geminiKey: val })} onSave={(val) => handleSaveSingleKey('geminiKey', val, 'Gemini Key')} secret />
               <KeyCard label="Groq API Key" value={vault.groqKey} onChange={(val) => setVault({ ...vault, groqKey: val })} onSave={(val) => handleSaveSingleKey('groqKey', val, 'Groq Key')} secret />
             </VaultGroup>
 
-            {/* Foldable Group 3: Cloudflare & Single Cloud Key */}
             <VaultGroup title="3. Cloudflare ID/Token व Single Cloud Key" open={openSections.vaultCloudflare} onToggle={() => toggleSec('vaultCloudflare')}>
               <KeyCard label="Cloudflare Account ID" value={vault.cloudflareAccountId} onChange={(val) => setVault({ ...vault, cloudflareAccountId: val })} onSave={(val) => handleSaveSingleKey('cloudflareAccountId', val, 'Cloudflare Account ID')} />
               <KeyCard label="Cloudflare API Token" value={vault.cloudflareApiToken} onChange={(val) => setVault({ ...vault, cloudflareApiToken: val })} onSave={(val) => handleSaveSingleKey('cloudflareApiToken', val, 'Cloudflare API Token')} secret />
               <KeyCard label="Cloud Single API Key (बिना ID वाला)" value={vault.cloudSingleKey} onChange={(val) => setVault({ ...vault, cloudSingleKey: val })} onSave={(val) => handleSaveSingleKey('cloudSingleKey', val, 'Cloud Single Key')} secret />
             </VaultGroup>
 
-            {/* Foldable Group 4: Gmail & UPI */}
             <VaultGroup title="4. Gmail Inbox व UPI ID" open={openSections.vaultComms} onToggle={() => toggleSec('vaultComms')}>
               <KeyCard label="Business Gmail Address" value={vault.gmailAddress} onChange={(val) => setVault({ ...vault, gmailAddress: val })} onSave={(val) => handleSaveSingleKey('gmailAddress', val, 'Gmail Address')} />
               <KeyCard label="Gmail App Password (16 अक्षर)" value={vault.gmailAppPassword} onChange={(val) => setVault({ ...vault, gmailAppPassword: val })} onSave={(val) => handleSaveSingleKey('gmailAppPassword', val, 'Gmail App Password')} secret />
@@ -531,7 +654,6 @@ export default function App() {
         )}
       </main>
 
-      {/* DEDICATED CORNER FLOATING MESSAGE & 1-TICK BOX */}
       <div className="fixed bottom-4 right-4 z-30">
         {!cornerOpen ? (
           <button
@@ -558,7 +680,7 @@ export default function App() {
                 <p>{d.hindiExplanation}</p>
                 <div className="flex gap-1.5">
                   <button onClick={() => handleApproveDeal(d, 'approve_deal_upi')} className="flex-1 bg-[#42B72A] text-white font-bold py-1.5 rounded-lg">
-                    ✅ ₹1,499 UPI भेजें
+                    ✅ ₹{d.amountInr || 2999} UPI भेजें
                   </button>
                   <button onClick={() => handleApproveDeal(d, 'cancel_deal')} className="bg-red-600 text-white font-bold px-2.5 py-1.5 rounded-lg">
                     ❌
@@ -567,20 +689,35 @@ export default function App() {
               </div>
             ))}
 
-            {pendingOutbox.slice(0, 5).map((l) => (
-              <div key={l.slug} className="bg-[#F0F2F5] border border-gray-300 rounded-xl p-2.5 text-xs space-y-1.5">
-                <div className="font-bold text-[#1C1E21]">{l.name} ({l.city})</div>
-                <p className="text-gray-600">{l.hindiSummary}</p>
-                <div className="flex gap-1.5">
-                  <button onClick={() => handleCornerTickLead(l)} className="flex-1 bg-[#42B72A] text-white font-bold py-1.5 rounded-lg flex items-center justify-center gap-1">
-                    <Check className="w-3.5 h-3.5" /> टिक (भेजें)
-                  </button>
-                  <button onClick={() => handleCornerSkipLead(l)} className="bg-gray-400 text-white font-bold px-2.5 py-1.5 rounded-lg">
-                    छोड़ें
-                  </button>
+            {pendingOutbox.slice(0, 5).map((l) => {
+              const price = l.offerPriceInr || l.amountInr || 2999;
+              return (
+                <div key={l.slug} className="bg-[#F0F2F5] border border-gray-300 rounded-xl p-2.5 text-xs space-y-1.5">
+                  <div className="font-bold text-[#1C1E21]">
+                    {l.name} ({l.city}) • <span className="text-[#42B72A]">₹{price}</span>
+                  </div>
+                  <p className="text-gray-600">{l.hindiSummary}</p>
+                  <div className="flex flex-wrap gap-1.5">
+                    <a href={l.demoUrl} target="_blank" rel="noreferrer" className="bg-white border border-gray-300 text-[#1877F2] font-bold px-2 py-1.5 rounded-lg">
+                      👁️ डेमो
+                    </a>
+                    {(l.phone || l.postUrl) && (
+                      <button onClick={() => handleSendWhatsAppLead(l)} className="flex-1 bg-[#42B72A] text-white font-bold py-1.5 rounded-lg flex items-center justify-center gap-1">
+                        <Check className="w-3.5 h-3.5" /> WhatsApp
+                      </button>
+                    )}
+                    {l.email && (
+                      <button onClick={() => handleSendEmailLead(l)} className="flex-1 bg-[#1877F2] text-white font-bold py-1.5 rounded-lg flex items-center justify-center gap-1">
+                        <Mail className="w-3.5 h-3.5" /> Email
+                      </button>
+                    )}
+                    <button onClick={() => handleCornerSkipLead(l)} className="bg-gray-400 text-white font-bold px-2 py-1.5 rounded-lg">
+                      छोड़ें
+                    </button>
+                  </div>
                 </div>
-              </div>
-            ))}
+              );
+            })}
 
             {cornerBadgeCount === 0 && (
               <p className="text-xs text-gray-500 text-center py-3">अभी कोई नया पेंडिंग संदेश नहीं है।</p>
