@@ -4,5 +4,29 @@
     "lead": "Verma Dental Clinic",
     "approved": true,
     "reason": "Rule pass"
+  },
+  {
+    "ts": "2026-11-27T14:50:03.436525+00:00",
+    "lead": "Manisha Hospital",
+    "approved": true,
+    "reason": "Rule pass"
+  },
+  {
+    "ts": "2026-11-27T14:50:03.452698+00:00",
+    "lead": "Hari OM Sweets",
+    "approved": true,
+    "reason": "Rule pass"
+  },
+  {
+    "ts": "2026-11-27T14:50:03.468885+00:00",
+    "lead": "Ram jewellers",
+    "approved": true,
+    "reason": "Rule pass"
+  },
+  {
+    "ts": "2026-11-27T14:50:03.484983+00:00",
+    "lead": "Smartway DIGITAL CLASSES",
+    "approved": true,
+    "reason": "Rule pass"
   }
 ]

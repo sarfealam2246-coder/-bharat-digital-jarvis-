@@ -1,1 +1,66 @@
-[]
+[
+  {
+    "source": "All-India Radar",
+    "name": "Manisha Hospital",
+    "category": "hospital",
+    "city": "Bhopal",
+    "phone": "0755 277 4851",
+    "email": "",
+    "slug": "manisha-hospital-bhopal",
+    "offerPriceInr": 7999,
+    "marketRateInr": "₹10,000 – ₹25,000",
+    "demoUrl": "https://sarfealam2246-coder.github.io/-bharat-digital-jarvis-/demos/manisha-hospital-bhopal/",
+    "hindiSummary": "Bhopal का Manisha Hospital — बिना वेबसाइट का बिज़नेस, ₹7999 ऑफर का डेमो तैयार है।",
+    "pitchMessage": "नमस्ते Manisha Hospital जी, मैंने देखा कि आपके hospital के लिए ऑनलाइन बुकिंग/वेबसाइट की कमी थी। मैंने आपके लिए पहले ही इसका डेमो हल तैयार कर दिया है: https://sarfealam2246-coder.github.io/-bharat-digital-jarvis-/demos/manisha-hospital-bhopal/। मार्केट में इसका खर्च ₹10,000 – ₹25,000 आता है, पर हम इसे ₹7999 में आपके नंबर व QR के साथ लाइव कर देंगे।",
+    "status": "NEW",
+    "foundAt": "2026-11-27T14:50:03.436689+00:00"
+  },
+  {
+    "source": "All-India Radar",
+    "name": "Hari OM Sweets",
+    "category": "supermarket",
+    "city": "Bhopal",
+    "phone": "+91 9826701637",
+    "email": "",
+    "slug": "hari-om-sweets-bhopal",
+    "offerPriceInr": 14999,
+    "marketRateInr": "₹30,000 – ₹80,000",
+    "demoUrl": "https://sarfealam2246-coder.github.io/-bharat-digital-jarvis-/demos/hari-om-sweets-bhopal/",
+    "hindiSummary": "Bhopal का Hari OM Sweets — बिना वेबसाइट का बिज़नेस, ₹14999 ऑफर का डेमो तैयार है।",
+    "pitchMessage": "नमस्ते Hari OM Sweets जी, मैंने देखा कि आपके supermarket के लिए ऑनलाइन बुकिंग/वेबसाइट की कमी थी। मैंने आपके लिए पहले ही इसका डेमो हल तैयार कर दिया है: https://sarfealam2246-coder.github.io/-bharat-digital-jarvis-/demos/hari-om-sweets-bhopal/। मार्केट में इसका खर्च ₹30,000 – ₹80,000 आता है, पर हम इसे ₹14999 में आपके नंबर व QR के साथ लाइव कर देंगे।",
+    "status": "NEW",
+    "foundAt": "2026-11-27T14:50:03.452955+00:00"
+  },
+  {
+    "source": "All-India Radar",
+    "name": "Ram jewellers",
+    "category": "jewelry",
+    "city": "Bhopal",
+    "phone": "7772968595",
+    "email": "",
+    "slug": "ram-jewellers-bhopal",
+    "offerPriceInr": 14999,
+    "marketRateInr": "₹30,000 – ₹80,000",
+    "demoUrl": "https://sarfealam2246-coder.github.io/-bharat-digital-jarvis-/demos/ram-jewellers-bhopal/",
+    "hindiSummary": "Bhopal का Ram jewellers — बिना वेबसाइट का बिज़नेस, ₹14999 ऑफर का डेमो तैयार है।",
+    "pitchMessage": "नमस्ते Ram jewellers जी, मैंने देखा कि आपके jewelry के लिए ऑनलाइन बुकिंग/वेबसाइट की कमी थी। मैंने आपके लिए पहले ही इसका डेमो हल तैयार कर दिया है: https://sarfealam2246-coder.github.io/-bharat-digital-jarvis-/demos/ram-jewellers-bhopal/। मार्केट में इसका खर्च ₹30,000 – ₹80,000 आता है, पर हम इसे ₹14999 में आपके नंबर व QR के साथ लाइव कर देंगे।",
+    "status": "NEW",
+    "foundAt": "2026-11-27T14:50:03.469154+00:00"
+  },
+  {
+    "source": "All-India Radar",
+    "name": "Smartway DIGITAL CLASSES",
+    "category": "business",
+    "city": "Bhopal",
+    "phone": "+91 9584245939",
+    "email": "",
+    "slug": "smartway-digital-classes-bhopal",
+    "offerPriceInr": 14999,
+    "marketRateInr": "₹30,000 – ₹80,000",
+    "demoUrl": "https://sarfealam2246-coder.github.io/-bharat-digital-jarvis-/demos/smartway-digital-classes-bhopal/",
+    "hindiSummary": "Bhopal का Smartway DIGITAL CLASSES — बिना वेबसाइट का बिज़नेस, ₹14999 ऑफर का डेमो तैयार है।",
+    "pitchMessage": "नमस्ते Smartway DIGITAL CLASSES जी, मैंने देखा कि आपके business के लिए ऑनलाइन बुकिंग/वेबसाइट की कमी थी। मैंने आपके लिए पहले ही इसका डेमो हल तैयार कर दिया है: https://sarfealam2246-coder.github.io/-bharat-digital-jarvis-/demos/smartway-digital-classes-bhopal/। मार्केट में इसका खर्च ₹30,000 – ₹80,000 आता है, पर हम इसे ₹14999 में आपके नंबर व QR के साथ लाइव कर देंगे।",
+    "status": "NEW",
+    "foundAt": "2026-11-27T14:50:03.485244+00:00"
+  }
+]
