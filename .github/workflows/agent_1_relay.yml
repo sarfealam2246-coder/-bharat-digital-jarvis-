@@ -2,7 +2,7 @@ name: Agent 1 Relay (North & West India + APK Actions)
 
 on:
   schedule:
-    - cron: '0 */2 * * *'
+    - cron: '0 * * * *'
   workflow_dispatch:
     inputs:
       apk_action:
@@ -35,7 +35,6 @@ jobs:
       - name: Run Agent 1 & Jarvis Audio Brief
         env:
           AGENT_SHIFT: agent1
-          ENABLE_RELAY: 'true'
           APK_ACTION: ${{ github.event.inputs.apk_action }}
           APK_TARGET_ID: ${{ github.event.inputs.apk_target_id }}
           APK_AMOUNT: ${{ github.event.inputs.apk_amount }}
