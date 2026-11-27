@@ -26,6 +26,10 @@ export interface LeadItem {
   status: 'NEW' | 'SENT' | 'PAID' | 'SKIPPED';
   payUrl?: string;
   amountInr?: number;
+  offerPriceInr?: number;
+  marketRateInr?: string;
+  clientReplyText?: string;
+  jarvisReplyDraft?: string;
   foundAt: string;
 }
 
