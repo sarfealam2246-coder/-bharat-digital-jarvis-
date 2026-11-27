@@ -97,7 +97,7 @@ export async function triggerWorkflowAction(
   v: VaultKeys,
   apkAction: string = '',
   targetId: string = '',
-  amount: string = '1499'
+  amount: string = '2999'
 ): Promise<void> {
   if (!v.githubPat.trim() || !v.githubRepo.includes('/')) {
     throw new Error('Pehle Vault me GitHub PAT aur Repo save karein.');
@@ -120,5 +120,67 @@ export async function triggerWorkflowAction(
   if (!res.ok) throw new Error(`Workflow trigger failed (${res.status})`);
 }
 
+export async function draftSmartReplyInApk(
+  v: VaultKeys,
+  lead: LeadItem,
+  clientReply: string
+): Promise<string> {
+  const price = lead.offerPriceInr || lead.amountInr || 2999;
+  const fallback = `नमस्ते ${lead.name} जी, आपका मैसेज मिला! आपका डेमो (${lead.demoUrl}) तैयार है। मार्केट रेट (${lead.marketRateInr || '₹10,000+'}) के मुकाबले हम इसे ₹${price} में आपके हिसाब से अपडेट करके लाइव कर देंगे। बताइए कब फाइनल करें?`;
+
+  const prompt = `You are Bharat Digital Jarvis, a helpful Indian freelance business assistant.
+Client: ${lead.name} (${lead.city}, category: ${lead.category})
+Demo URL: ${lead.demoUrl}
+Offer Price: ₹${price} (Market rate: ${lead.marketRateInr || '₹10,000+'})
+Client's WhatsApp/Email reply: "${clientReply}"
+
+Write a short, polite, persuasive reply in Hindi/Hinglish (2-3 sentences max) that answers the client's question, keeps bargaining polite, and invites them to confirm or pay via UPI (${v.upiId || 'our UPI'}) to unlock the live demo.`;
+
+  if (v.geminiKey.trim()) {
+    try {
+      const r = await fetch(
+        `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent?key=${v.geminiKey.trim()}`,
+        {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ contents: [{ parts: [{ text: prompt }] }] })
+        }
+      );
+      if (r.ok) {
+        const j = await r.json();
+        const txt = j?.candidates?.[0]?.content?.parts?.[0]?.text?.trim();
+        if (txt) return txt;
+      }
+    } catch {
+      // fallback below
+    }
+  }
+
+  if (v.groqKey.trim()) {
+    try {
+      const r = await fetch('https://api.groq.com/openai/v1/chat/completions', {
+        method: 'POST',
+        headers: {
+          Authorization: `Bearer ${v.groqKey.trim()}`,
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({
+          model: 'llama-3.3-70b-versatile',
+          messages: [{ role: 'user', content: prompt }],
+          temperature: 0.4
+        })
+      });
+      if (r.ok) {
+        const j = await r.json();
+        const txt = j?.choices?.[0]?.message?.content?.trim();
+        if (txt) return txt;
+      }
+    } catch {
+      // fallback below
+    }
+  }
+
+  return fallback;
+}
+
 void nacl;
-                             
