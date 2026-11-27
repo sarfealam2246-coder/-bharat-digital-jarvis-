@@ -412,5 +412,29 @@
     "lead": "CHC, Dundigarh",
     "approved": true,
     "reason": "Rule pass"
+  },
+  {
+    "ts": "2026-11-27T17:56:22.674409+00:00",
+    "lead": "Bhatia Workshop",
+    "approved": true,
+    "reason": "Rule pass"
+  },
+  {
+    "ts": "2026-11-27T17:56:22.686329+00:00",
+    "lead": "Jai Mangal Palace",
+    "approved": true,
+    "reason": "Rule pass"
+  },
+  {
+    "ts": "2026-11-27T17:56:22.698445+00:00",
+    "lead": "Tony Guesthouse",
+    "approved": true,
+    "reason": "Rule pass"
+  },
+  {
+    "ts": "2026-11-27T17:56:22.710521+00:00",
+    "lead": "Shravan Hotel And Restaurant",
+    "approved": true,
+    "reason": "Rule pass"
   }
 ]
