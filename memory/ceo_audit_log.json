@@ -268,5 +268,29 @@
     "lead": "International Book Service",
     "approved": true,
     "reason": "Rule pass"
+  },
+  {
+    "ts": "2026-11-27T16:12:31.611416+00:00",
+    "lead": "Imperial Villa",
+    "approved": true,
+    "reason": "Rule pass"
+  },
+  {
+    "ts": "2026-11-27T16:12:31.637582+00:00",
+    "lead": "Police Station Malviya Nagar",
+    "approved": true,
+    "reason": "Rule pass"
+  },
+  {
+    "ts": "2026-11-27T16:12:31.660770+00:00",
+    "lead": "Goyal MRI & Diagnostic Centre",
+    "approved": true,
+    "reason": "Rule pass"
+  },
+  {
+    "ts": "2026-11-27T16:12:31.683649+00:00",
+    "lead": "Pizza Hut",
+    "approved": true,
+    "reason": "Rule pass"
   }
 ]
