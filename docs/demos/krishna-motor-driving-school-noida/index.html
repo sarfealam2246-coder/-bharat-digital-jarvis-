@@ -26,25 +26,52 @@
 </head>
 <body>
   <div class="wrap">
-    <div class="wm">SAMPLE DEMO • LOCKED</div>
-    <div class="demo-badge">🔒 DEMO PREVIEW ONLY — क्लाइंट बुकिंग व नंबर पेमेंट के बाद अनलॉक होंगे</div>
+    <div class="wm" id="wmLock">SAMPLE DEMO • LOCKED</div>
+    <div class="demo-badge" id="demoRibbon">🔒 DEMO PREVIEW ONLY — क्लाइंट बुकिंग व नंबर पेमेंट के बाद अनलॉक होंगे</div>
     <div class="hero"><img src="banner.png" alt="Krishna Motor Driving School" /></div>
     <div class="pad">
       <h1>Krishna Motor Driving School</h1>
       <p class="muted">📍 Noida • ⏰ 8:00 AM – 7:00 PM</p>
       <p>Noida में नए बैच और ऑनलाइन एडमिशन रजिस्ट्रेशन</p>
-      <a class="btn btn-wa" href="#contact-box" onclick="alert('यह DEMO प्रीव्यू है! अपने असली WhatsApp नंबर से बुकिंग चालू करने के लिए नीचे ऑर्डर बटन से अनलॉक कराएँ।')">💬 एडमिशन के लिए WhatsApp करें</a>
-      <a class="btn btn-map" href="#contact-box" target="_blank">📍 Google Maps लोकेशन देखें</a>
+      <a class="btn btn-wa" id="waBtn" href="#contact-box" onclick="return handleLockedBtn(this, event);">💬 एडमिशन के लिए WhatsApp करें</a>
+      <a class="btn btn-map" id="mapBtn" href="#contact-box" target="_blank" onclick="return handleLockedBtn(this, event);">📍 Google Maps लोकेशन देखें</a>
       <h3>सेवाएँ और रेट</h3>
       <div class="card"><div class="row"><strong>नया बैच एडमिशन फॉर्म</strong><span class="price">ऑनलाइन</span></div><p class="muted">छात्र सीधे नाम और नंबर दर्ज करें</p></div>
 <div class="card"><div class="row"><strong>कोर्स व फीस चार्ट</strong><span class="price">पूरा विवरण</span></div><p class="muted">समय, विषय और डेमो क्लास</p></div>
 <div class="card"><div class="row"><strong>पैरेंट्स हेल्पडेस्क</strong><span class="price">1-टैप</span></div><p class="muted">सीधा कॉल और लोकेशन लिंक</p></div>
-      <div class="qr-box"><strong>🔒 काउंटर QR कोड (लॉक)</strong><br/><p class="muted">असली प्रिंटेबल QR कोड फाइनल सेटअप के बाद अनलॉक होगा।</p></div>
+      <div class="qr-box" id="qrLocked"><strong>🔒 काउंटर QR कोड (लॉक)</strong><br/><p class="muted">असली प्रिंटेबल QR कोड फाइनल सेटअप के बाद अनलॉक होगा।</p></div>
       <div class="card" id="contact-box">
         <strong>इस वेबसाइट को अपने नंबर के साथ फाइनल करवाएँ:</strong>
-        <p class="muted">मार्केट रेट: ₹15,000 – ₹50,000 • हमारा डायरेक्ट सेटअप ऑफर: <strong>₹11999</strong> (मोलभाव के लिए बात करें)</p>
+        <p class="muted">मार्केट रेट: ₹15,000 – ₹50,000 • हमारा डायरेक्ट सेटअप ऑफर: <strong>₹11999</strong> (मोलभाव व अपने नाम के .in डोमेन के लिए बात करें)</p>
         <a class="btn-mail" href="mailto:sarfe293@gmail.com?subject=Website%20Order%3A%20Krishna%20Motor%20Driving%20School&body=Namaste%2C%20mujhe%20apni%20website%20%28https%3A//sarfealam2246-coder.github.io/-bharat-digital-jarvis-/demos/krishna-motor-driving-school-noida/%29%20final%20karwani%20hai.%20Mera%20phone%20number%3A%20">📩 ईमेल से ऑर्डर / बदलाव भेजें</a>
       </div>
+      
+      <div style="text-align:center;margin-top:14px;">
+        <button onclick="unlockOwnerPreview()" style="background:#f3f4f6;border:1px solid #d1d5db;color:#374151;padding:6px 12px;border-radius:6px;font-size:12px;cursor:pointer;">🔑 Owner View (सिर्फ़ मालिक के लिए)</button>
+      </div>
+      <script>
+        var __ownerUnlocked = false;
+        function handleLockedBtn(el, ev) {
+          if (__ownerUnlocked) return true;
+          ev.preventDefault();
+          alert('यह DEMO प्रीव्यू है! अपने असली WhatsApp नंबर से बुकिंग चालू करने के लिए नीचे ऑर्डर बटन से अनलॉक कराएँ।');
+          return false;
+        }
+        function unlockOwnerPreview() {
+          var pin = prompt('Owner Preview पासवर्ड डालें:');
+          if (pin === '7860') {
+            __ownerUnlocked = true;
+            var wm = document.getElementById('wmLock'); if (wm) wm.style.display = 'none';
+            var rb = document.getElementById('demoRibbon'); if (rb) { rb.style.background = '#15803d'; rb.style.color = '#fff'; rb.innerText = '🔓 OWNER PREVIEW MODE — सभी बटन टेस्ट के लिए खुले हैं'; }
+            var wa = document.getElementById('waBtn'); if (wa) wa.href = 'https://wa.me/919313003671?text=%E0%A4%A8%E0%A4%AE%E0%A4%B8%E0%A5%8D%E0%A4%A4%E0%A5%87%2C%20%E0%A4%AE%E0%A5%81%E0%A4%9D%E0%A5%87%20%E0%A4%85%E0%A4%AA%E0%A5%89%E0%A4%87%E0%A4%82%E0%A4%9F%E0%A4%AE%E0%A5%87%E0%A4%82%E0%A4%9F/%E0%A4%B8%E0%A4%B0%E0%A5%8D%E0%A4%B5%E0%A4%BF%E0%A4%B8%20%E0%A4%95%E0%A5%87%20%E0%A4%AC%E0%A4%BE%E0%A4%B0%E0%A5%87%20%E0%A4%AE%E0%A5%87%E0%A4%82%20%E0%A4%AC%E0%A4%BE%E0%A4%A4%20%E0%A4%95%E0%A4%B0%E0%A4%A8%E0%A5%80%20%E0%A4%B9%E0%A5%88%E0%A5%A4';
+            var mp = document.getElementById('mapBtn'); if (mp) mp.href = 'https://www.google.com/maps/search/?api=1&query=Krishna%20Motor%20Driving%20School%20Noida';
+            var qr = document.getElementById('qrLocked'); if (qr) qr.innerHTML = '<strong>काउंटर QR कोड (Owner Preview)</strong><br/><img src="qr.png" alt="QR Code" /><br/><span class="muted">फाइनल होने पर क्लाइंट को ऐसा दिखेगा</span>';
+          } else if (pin !== null) {
+            alert('गलत पासवर्ड!');
+          }
+        }
+      </script>
+    
     </div>
   </div>
 </body>
