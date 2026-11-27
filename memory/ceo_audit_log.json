@@ -244,5 +244,29 @@
     "lead": "Krishna Motor Driving School",
     "approved": true,
     "reason": "Rule pass"
+  },
+  {
+    "ts": "2026-11-27T16:11:25.257312+00:00",
+    "lead": "Magarpatta City Public School",
+    "approved": true,
+    "reason": "Rule pass"
+  },
+  {
+    "ts": "2026-11-27T16:11:25.273931+00:00",
+    "lead": "11 East Street Cafe",
+    "approved": true,
+    "reason": "Rule pass"
+  },
+  {
+    "ts": "2026-11-27T16:11:25.290371+00:00",
+    "lead": "Olympia Restaurant - Kathi Kebabs",
+    "approved": true,
+    "reason": "Rule pass"
+  },
+  {
+    "ts": "2026-11-27T16:11:25.306646+00:00",
+    "lead": "International Book Service",
+    "approved": true,
+    "reason": "Rule pass"
   }
 ]
