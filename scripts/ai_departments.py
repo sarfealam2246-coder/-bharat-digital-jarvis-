@@ -27,34 +27,38 @@ def save_memory(name: str, data):
     p.write_text(json.dumps(data, ensure_ascii=False, indent=2), encoding="utf-8")
 
 
+def _has_word(text: str, words: list[str]) -> bool:
+    return any(re.search(rf"\b{re.escape(w)}\b", text) for w in words)
+
+
 def estimate_market_rate(category: str, name: str = "", notes: str = "") -> dict:
-    """2026 India market-rate pricing engine so every lead gets an accurate market & offer price."""
+    """2026 India market-rate pricing engine with word-boundary matching."""
     text = f"{category} {name} {notes}".lower()
-    if any(k in text for k in ["clinic", "doctor", "dentist", "hospital", "dental", "medical", "pharma"]):
+    if _has_word(text, ["clinic", "doctor", "doctors", "dentist", "hospital", "dental", "medical", "pharmacy", "nursing"]):
         return {
             "marketRateInr": "₹10,000 – ₹25,000",
             "offerPriceInr": 7999,
             "workScope": "Clinic Appointment + QR Booking Site",
         }
-    if any(k in text for k in ["school", "college", "coaching", "tuition", "academy", "institute"]):
+    if _has_word(text, ["school", "college", "coaching", "tuition", "academy", "institute", "classes"]):
         return {
             "marketRateInr": "₹15,000 – ₹50,000",
             "offerPriceInr": 11999,
             "workScope": "Admission + Notice & Test Portal",
         }
-    if any(k in text for k in ["estate", "property", "builder", "car", "motorcycle", "showroom", "hotel", "resort"]):
+    if _has_word(text, ["estate_agent", "estate", "property", "builder", "car", "motorcycle", "showroom", "hotel", "resort"]):
         return {
             "marketRateInr": "₹15,000 – ₹45,000",
             "offerPriceInr": 9999,
-            "workScope": "Property / Catalogue Showcase + WhatsApp Lead Site",
+            "workScope": "Property / Room / Showroom Showcase + WhatsApp Lead Site",
         }
-    if any(k in text for k in ["ecommerce", "e-commerce", "store", "mart", "supermarket", "jewel", "electronics", "furniture"]):
+    if _has_word(text, ["ecommerce", "supermarket", "mart", "jewel", "jewellers", "jewelry", "electronics", "furniture", "sarees", "clothes"]):
         return {
             "marketRateInr": "₹30,000 – ₹80,000",
             "offerPriceInr": 14999,
-            "workScope": "Online Catalogue + UPI Order Site",
+            "workScope": "Online Catalogue + WhatsApp Order Site",
         }
-    if any(k in text for k in ["online_gig", "freelance", "reddit", "dashboard", "portal", "app", "saas", "tool", "bot"]):
+    if _has_word(text, ["online_gig", "freelance", "dashboard", "portal", "saas", "bot"]):
         return {
             "marketRateInr": "₹25,000 – ₹1,00,000+",
             "offerPriceInr": 12999,
@@ -83,9 +87,9 @@ def load_skill_for_category(category: str) -> str:
     cat = (category or "").lower()
     if any(k in cat for k in ["clinic", "doctor", "dentist", "hospital"]):
         fname = "clinic.md"
-    elif any(k in cat for k in ["school", "college", "coaching", "tuition"]):
+    elif any(k in cat for k in ["school", "college", "coaching", "tuition", "classes"]):
         fname = "coaching_school.md"
-    elif any(k in cat for k in ["estate", "property", "car", "motorcycle", "showroom"]):
+    elif any(k in cat for k in ["estate", "property", "car", "motorcycle", "showroom", "hotel"]):
         fname = "realestate.md"
     else:
         fname = "general_business.md"
@@ -318,4 +322,4 @@ Return JSON: {{"approved": true, "reason": "short note", "polishedMessage": "fin
     audit_log.append({"ts": datetime.now(timezone.utc).isoformat(), "lead": lead.get("name"), "approved": res.get("approved", True), "reason": res.get("reason", "")})
     save_memory("ceo_audit_log.json", audit_log[-100:])
     return res
-                         
+                 
