@@ -508,5 +508,29 @@
     "lead": "Baba Haveli Guesthouse",
     "approved": true,
     "reason": "Rule pass"
+  },
+  {
+    "ts": "2026-11-27T18:14:13.834363+00:00",
+    "lead": "eye hospital",
+    "approved": true,
+    "reason": "Rule pass"
+  },
+  {
+    "ts": "2026-11-27T18:14:13.857291+00:00",
+    "lead": "Ashok path",
+    "approved": true,
+    "reason": "Rule pass"
+  },
+  {
+    "ts": "2026-11-27T18:14:13.881295+00:00",
+    "lead": "Ashirwad Bhavan",
+    "approved": true,
+    "reason": "Rule pass"
+  },
+  {
+    "ts": "2026-11-27T18:14:13.904440+00:00",
+    "lead": "Sagar Car Washing",
+    "approved": true,
+    "reason": "Rule pass"
   }
 ]
