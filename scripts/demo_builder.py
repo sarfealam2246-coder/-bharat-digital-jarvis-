@@ -50,7 +50,7 @@ def build_demo_copy(lead: dict) -> dict:
 Follow this Skill Playbook:
 {skill_rules}
 
-Create clean Hindi+English website copy for:
+Create clean Hindi+English website copy specifically tailored to:
 Name: {lead.get('name')}
 Category: {lead.get('category')}
 City: {lead.get('city')}
@@ -59,11 +59,11 @@ Learnings: {learnings.get('tips', [])[-4:]}
 
 Return ONLY JSON:
 {{
-  "tagline": "Short trustworthy Hindi+English tagline",
+  "tagline": "Short trustworthy Hindi+English tagline for this exact business",
   "services": [
-    {{"title": "Service 1", "price": "₹499", "desc": "Short 1-line detail"}},
-    {{"title": "Service 2", "price": "₹999", "desc": "Short 1-line detail"}},
-    {{"title": "Service 3", "price": "₹1,499", "desc": "Short 1-line detail"}}
+    {{"title": "Specific Service 1", "price": "₹...", "desc": "Short 1-line detail"}},
+    {{"title": "Specific Service 2", "price": "₹...", "desc": "Short 1-line detail"}},
+    {{"title": "Specific Service 3", "price": "₹...", "desc": "Short 1-line detail"}}
   ],
   "hours": "10:00 AM – 8:30 PM",
   "ctaLabel": "WhatsApp पर बुक / बात करें"
@@ -72,8 +72,8 @@ Return ONLY JSON:
     res = run_department("builder", prompt, "You are an Indian SMB custom web builder. Return ONLY JSON.", expect_json=True)
     if isinstance(res, dict) and res.get("services"):
         return res
-    cat = (lead.get("category") or "").lower()
-    if any(k in cat for k in ["clinic", "doctor", "dentist"]):
+    text = f"{lead.get('category', '')} {lead.get('name', '')}".lower()
+    if any(k in text for k in ["clinic", "doctor", "dentist", "hospital", "medical"]):
         return {
             "tagline": f"{lead.get('city', 'India')} का भरोसेमंद स्वास्थ्य एवं अपॉइंटमेंट सेंटर",
             "services": [
@@ -84,7 +84,7 @@ Return ONLY JSON:
             "hours": "10:00 AM – 8:00 PM",
             "ctaLabel": "WhatsApp पर अपॉइंटमेंट बुक करें",
         }
-    if any(k in cat for k in ["school", "college", "coaching"]):
+    if any(k in text for k in ["school", "college", "coaching", "classes", "academy", "tuition"]):
         return {
             "tagline": f"{lead.get('city', 'India')} में नए बैच और ऑनलाइन एडमिशन रजिस्ट्रेशन",
             "services": [
@@ -95,23 +95,34 @@ Return ONLY JSON:
             "hours": "8:00 AM – 7:00 PM",
             "ctaLabel": "एडमिशन के लिए WhatsApp करें",
         }
-    if any(k in cat for k in ["estate", "property", "car", "motorcycle", "showroom"]):
+    if any(k in text for k in ["hotel", "resort", "restaurant", "cafe", "sweets", "bakery", "dhaba"]):
         return {
-            "tagline": f"{lead.get('city', 'India')} के चुनिंदा प्लॉट, फ्लैट व व्हीकल शोकेस",
+            "tagline": f"{lead.get('city', 'India')} में ताज़ा स्वाद, टेबल बुकिंग व ऑनलाइन ऑर्डर",
             "services": [
-                {"title": "साइट विज़िट / टेस्ट ड्राइव", "price": "फ्री", "desc": "तुरंत अपॉइंटमेंट और लोकेशन"},
-                {"title": "फाइनेंस व EMI जानकारी", "price": "उपलब्ध", "desc": "आसान किश्तें और डॉक्यूमेंट गाइड"},
-                {"title": "VIP WhatsApp ब्रोशर", "price": "1-क्लिक", "desc": "फोटो व रेट लिस्ट फोन पर"},
+                {"title": "टेबल / रूम बुकिंग", "price": "तुरंत", "desc": "बिना वेटिंग सीधे WhatsApp बुकिंग"},
+                {"title": "स्पेशल मेनू व कैटरिंग", "price": "पूरा चार्ट", "desc": "ताज़ा रेट लिस्ट और पार्टी ऑर्डर"},
+                {"title": "होम डिलीवरी / पार्सल", "price": "1-क्लिक", "desc": "सीधा कॉल और लोकेशन लिंक"},
             ],
-            "hours": "10:00 AM – 8:00 PM",
-            "ctaLabel": "रेट व विज़िट के लिए WhatsApp करें",
+            "hours": "9:00 AM – 10:30 PM",
+            "ctaLabel": "ऑर्डर / बुकिंग के लिए WhatsApp करें",
+        }
+    if any(k in text for k in ["jewel", "sarees", "clothes", "furniture", "electronics", "estate", "property", "showroom"]):
+        return {
+            "tagline": f"{lead.get('city', 'India')} के चुनिंदा कलेक्शन व डायरेक्ट WhatsApp कैटलॉग",
+            "services": [
+                {"title": "लेटेस्ट डिज़ाइन कैटलॉग", "price": "फ्री देखें", "desc": "नए कलेक्शन और कीमत सीधे फोन पर"},
+                {"title": "विज़िट अपॉइंटमेंट", "price": "1-टैप", "desc": "शोरूम लोकेशन और समय बुक करें"},
+                {"title": "स्पेशल ऑफर व डील", "price": "उपलब्ध", "desc": "त्योहार व शादी के विशेष पैकेज"},
+            ],
+            "hours": "10:30 AM – 8:30 PM",
+            "ctaLabel": "कैटलॉग व रेट के लिए WhatsApp करें",
         }
     return {
         "tagline": f"{lead.get('city', 'India')} में तेज़, भरोसेमंद और किफायती सेवा",
         "services": [
-            {"title": "स्टैंडर्ड पैक", "price": "₹499", "desc": "तुरंत बुकिंग व सपोर्ट"},
-            {"title": "प्रीमियम पैक", "price": "₹999", "desc": "पूरी सेवा और प्राथमिकता"},
-            {"title": "मंथली अपडेट पैक", "price": "₹1,499", "desc": "ऑफर पोस्टर व बदलाव सहित"},
+            {"title": "प्रमुख सेवा / पैकेज", "price": "बेस्ट रेट", "desc": "तुरंत बुकिंग व ग्राहक सहायता"},
+            {"title": "होम विज़िट / ऑनलाइन सलाह", "price": "उपलब्ध", "desc": "सीधा WhatsApp पर जानकारी लें"},
+            {"title": "मंथली / बल्क ऑर्डर", "price": "स्पेशल छूट", "desc": "नियमित ग्राहकों के लिए विशेष सुविधा"},
         ],
         "hours": "10:00 AM – 8:30 PM",
         "ctaLabel": "अभी WhatsApp पर बात करें",
@@ -156,23 +167,55 @@ def build_demo_page(lead: dict, base_pages_url: str, is_final: bool = False) -> 
     phone_digits = re.sub(r"\D", "", str(lead.get("phone", "")))
     if len(phone_digits) == 10:
         phone_digits = "91" + phone_digits
-    wa_link = f"https://wa.me/{phone_digits}?text={urllib.parse.quote('नमस्ते, मुझे अपॉइंटमेंट/सर्विस के बारे में बात करनी है।')}" if (is_final and phone_digits) else "#contact-box"
-    wa_onclick = "" if is_final else ' onclick="alert(\'यह DEMO प्रीव्यू है! अपने असली WhatsApp नंबर से बुकिंग चालू करने के लिए नीचे ऑर्डर बटन से अनलॉक कराएँ।\')"'
+    real_wa_url = f"https://wa.me/{phone_digits}?text={urllib.parse.quote('नमस्ते, मुझे अपॉइंटमेंट/सर्विस के बारे में बात करनी है।')}" if phone_digits else "#contact-box"
     maps_q = urllib.parse.quote(f"{lead.get('name')} {lead.get('city', 'India')}")
-    maps_link = f"https://www.google.com/maps/search/?api=1&query={maps_q}" if is_final else "#contact-box"
+    real_maps_url = f"https://www.google.com/maps/search/?api=1&query={maps_q}"
+
+    wa_link = real_wa_url if is_final else "#contact-box"
+    wa_onclick = "" if is_final else ' onclick="return handleLockedBtn(this, event);"'
+    maps_link = real_maps_url if is_final else "#contact-box"
+    maps_onclick = "" if is_final else ' onclick="return handleLockedBtn(this, event);"'
     bot_email = os.getenv("GMAIL_ADDRESS", "sarfe293@gmail.com").strip() or "sarfe293@gmail.com"
+    owner_pin = os.getenv("OWNER_PIN", "7860").strip() or "7860"
 
     services_html = "\n".join(
         f'<div class="card"><div class="row"><strong>{html.escape(s.get("title", ""))}</strong><span class="price">{html.escape(s.get("price", ""))}</span></div><p class="muted">{html.escape(s.get("desc", ""))}</p></div>'
         for s in copy.get("services", [])
     )
-    demo_ribbon = "" if is_final else '<div class="demo-badge">🔒 DEMO PREVIEW ONLY — क्लाइंट बुकिंग व नंबर पेमेंट के बाद अनलॉक होंगे</div>'
-    watermark_div = "" if is_final else '<div class="wm">SAMPLE DEMO • LOCKED</div>'
+    demo_ribbon = "" if is_final else '<div class="demo-badge" id="demoRibbon">🔒 DEMO PREVIEW ONLY — क्लाइंट बुकिंग व नंबर पेमेंट के बाद अनलॉक होंगे</div>'
+    watermark_div = "" if is_final else '<div class="wm" id="wmLock">SAMPLE DEMO • LOCKED</div>'
     qr_section = (
         '<div class="qr-box"><strong>काउंटर QR कोड (स्कैन करके सेव करें)</strong><br/><img src="qr.png" alt="QR Code" /><br/><span class="muted">प्रिंट कराके दुकान/क्लिनिक काउंटर पर लगाएँ</span></div>'
         if is_final
-        else '<div class="qr-box"><strong>🔒 काउंटर QR कोड (लॉक)</strong><br/><p class="muted">असली प्रिंटेबल QR कोड फाइनल सेटअप के बाद अनलॉक होगा।</p></div>'
+        else '<div class="qr-box" id="qrLocked"><strong>🔒 काउंटर QR कोड (लॉक)</strong><br/><p class="muted">असली प्रिंटेबल QR कोड फाइनल सेटअप के बाद अनलॉक होगा।</p></div>'
     )
+    owner_btn_html = "" if is_final else f"""
+      <div style="text-align:center;margin-top:14px;">
+        <button onclick="unlockOwnerPreview()" style="background:#f3f4f6;border:1px solid #d1d5db;color:#374151;padding:6px 12px;border-radius:6px;font-size:12px;cursor:pointer;">🔑 Owner View (सिर्फ़ मालिक के लिए)</button>
+      </div>
+      <script>
+        var __ownerUnlocked = false;
+        function handleLockedBtn(el, ev) {{
+          if (__ownerUnlocked) return true;
+          ev.preventDefault();
+          alert('यह DEMO प्रीव्यू है! अपने असली WhatsApp नंबर से बुकिंग चालू करने के लिए नीचे ऑर्डर बटन से अनलॉक कराएँ।');
+          return false;
+        }}
+        function unlockOwnerPreview() {{
+          var pin = prompt('Owner Preview पासवर्ड डालें:');
+          if (pin === '{owner_pin}') {{
+            __ownerUnlocked = true;
+            var wm = document.getElementById('wmLock'); if (wm) wm.style.display = 'none';
+            var rb = document.getElementById('demoRibbon'); if (rb) {{ rb.style.background = '#15803d'; rb.style.color = '#fff'; rb.innerText = '🔓 OWNER PREVIEW MODE — सभी बटन टेस्ट के लिए खुले हैं'; }}
+            var wa = document.getElementById('waBtn'); if (wa) wa.href = '{real_wa_url}';
+            var mp = document.getElementById('mapBtn'); if (mp) mp.href = '{real_maps_url}';
+            var qr = document.getElementById('qrLocked'); if (qr) qr.innerHTML = '<strong>काउंटर QR कोड (Owner Preview)</strong><br/><img src="qr.png" alt="QR Code" /><br/><span class="muted">फाइनल होने पर क्लाइंट को ऐसा दिखेगा</span>';
+          }} else if (pin !== null) {{
+            alert('गलत पासवर्ड!');
+          }}
+        }}
+      </script>
+    """
 
     page_html = f"""<!doctype html>
 <html lang="hi">
@@ -209,16 +252,17 @@ def build_demo_page(lead: dict, base_pages_url: str, is_final: bool = False) -> 
       <h1>{html.escape(lead.get('name', 'Business'))}</h1>
       <p class="muted">📍 {html.escape(lead.get('city', 'India'))} • ⏰ {html.escape(copy.get('hours', '10 AM - 8 PM'))}</p>
       <p>{html.escape(copy.get('tagline', ''))}</p>
-      <a class="btn btn-wa" href="{wa_link}"{wa_onclick}>💬 {html.escape(copy.get('ctaLabel', 'WhatsApp पर बात करें'))}</a>
-      <a class="btn btn-map" href="{maps_link}" target="_blank">📍 Google Maps लोकेशन देखें</a>
+      <a class="btn btn-wa" id="waBtn" href="{wa_link}"{wa_onclick}>💬 {html.escape(copy.get('ctaLabel', 'WhatsApp पर बात करें'))}</a>
+      <a class="btn btn-map" id="mapBtn" href="{maps_link}" target="_blank"{maps_onclick}>📍 Google Maps लोकेशन देखें</a>
       <h3>सेवाएँ और रेट</h3>
       {services_html}
       {qr_section}
       <div class="card" id="contact-box">
         <strong>इस वेबसाइट को अपने नंबर के साथ फाइनल करवाएँ:</strong>
-        <p class="muted">मार्केट रेट: {html.escape(str(market_rate))} • हमारा डायरेक्ट सेटअप ऑफर: <strong>₹{offer_inr}</strong> (मोलभाव के लिए बात करें)</p>
+        <p class="muted">मार्केट रेट: {html.escape(str(market_rate))} • हमारा डायरेक्ट सेटअप ऑफर: <strong>₹{offer_inr}</strong> (मोलभाव व अपने नाम के .in डोमेन के लिए बात करें)</p>
         <a class="btn-mail" href="mailto:{html.escape(bot_email)}?subject={urllib.parse.quote('Website Order: ' + lead.get('name', ''))}&body={urllib.parse.quote('Namaste, mujhe apni website (' + demo_url + ') final karwani hai. Mera phone number: ')}">📩 ईमेल से ऑर्डर / बदलाव भेजें</a>
       </div>
+      {owner_btn_html}
     </div>
   </div>
 </body>
