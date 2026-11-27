@@ -1,4 +1,5 @@
 import nacl from 'tweetnacl';
+// @ts-ignore
 import { seal } from 'tweetnacl-sealedbox-js';
 import { DealItem, LeadItem, LiveStatus, RunReport, VaultKeys } from '../types/jarvis';
 
@@ -120,3 +121,4 @@ export async function triggerWorkflowAction(
 }
 
 void nacl;
+                             
