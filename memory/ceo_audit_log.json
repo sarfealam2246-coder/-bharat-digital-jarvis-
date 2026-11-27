@@ -292,5 +292,29 @@
     "lead": "Pizza Hut",
     "approved": true,
     "reason": "Rule pass"
+  },
+  {
+    "ts": "2026-11-27T16:35:53.520865+00:00",
+    "lead": "Nathani Voluntary Blood Bank, Rajkot",
+    "approved": true,
+    "reason": "Rule pass"
+  },
+  {
+    "ts": "2026-11-27T16:35:53.537511+00:00",
+    "lead": "Sapar CHC",
+    "approved": true,
+    "reason": "Rule pass"
+  },
+  {
+    "ts": "2026-11-27T16:35:53.554356+00:00",
+    "lead": "Government hospital saraldad",
+    "approved": true,
+    "reason": "Rule pass"
+  },
+  {
+    "ts": "2026-11-27T16:35:53.571583+00:00",
+    "lead": "Rudra Steel Industries",
+    "approved": true,
+    "reason": "Rule pass"
   }
 ]
