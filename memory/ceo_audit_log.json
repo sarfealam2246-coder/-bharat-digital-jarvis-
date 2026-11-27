@@ -148,5 +148,29 @@
     "lead": "Arshid shah",
     "approved": true,
     "reason": "Rule pass"
+  },
+  {
+    "ts": "2026-11-27T15:30:42.118721+00:00",
+    "lead": "Pasuparthy Super Market",
+    "approved": true,
+    "reason": "Rule pass"
+  },
+  {
+    "ts": "2026-11-27T15:30:42.139394+00:00",
+    "lead": "Vanam Restaurant",
+    "approved": true,
+    "reason": "Rule pass"
+  },
+  {
+    "ts": "2026-11-27T15:30:42.160603+00:00",
+    "lead": "Andhra Spice",
+    "approved": true,
+    "reason": "Rule pass"
+  },
+  {
+    "ts": "2026-11-27T15:30:42.181135+00:00",
+    "lead": "Chandragiri Police Station",
+    "approved": true,
+    "reason": "Rule pass"
   }
 ]
