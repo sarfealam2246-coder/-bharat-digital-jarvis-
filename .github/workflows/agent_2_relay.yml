@@ -1,8 +1,6 @@
 name: Agent 2 Relay (South, East & Online Gigs)
 
 on:
-  schedule:
-    - cron: '10,30,50 * * * *'
   workflow_dispatch:
 
 permissions:
@@ -25,6 +23,7 @@ jobs:
       - name: Run Agent 2 & Gmail Inbox Reader
         env:
           AGENT_SHIFT: agent2
+          ENABLE_RELAY: 'false'
           NVIDIA_API_KEY: ${{ secrets.NVIDIA_API_KEY }}
           GROQ_API_KEY: ${{ secrets.GROQ_API_KEY }}
           GEMINI_API_KEY: ${{ secrets.GEMINI_API_KEY }}
