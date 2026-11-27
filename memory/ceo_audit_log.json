@@ -220,5 +220,29 @@
     "lead": "Ankur",
     "approved": true,
     "reason": "Rule pass"
+  },
+  {
+    "ts": "2026-11-27T15:55:53.798320+00:00",
+    "lead": "Shyam Sweets",
+    "approved": true,
+    "reason": "Rule pass"
+  },
+  {
+    "ts": "2026-11-27T15:55:53.811982+00:00",
+    "lead": "Frameszon",
+    "approved": true,
+    "reason": "Rule pass"
+  },
+  {
+    "ts": "2026-11-27T15:55:53.837675+00:00",
+    "lead": "Ram Lal Kundan Lal Orthopaedic Hospital",
+    "approved": true,
+    "reason": "Rule pass"
+  },
+  {
+    "ts": "2026-11-27T15:55:53.859969+00:00",
+    "lead": "Krishna Motor Driving School",
+    "approved": true,
+    "reason": "Rule pass"
   }
 ]
