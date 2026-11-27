@@ -436,5 +436,29 @@
     "lead": "Partap Hospital Daba",
     "approved": true,
     "reason": "Rule pass"
+  },
+  {
+    "ts": "2026-11-27T18:01:51.272459+00:00",
+    "lead": "Bhagwan Dass Cycle Stores",
+    "approved": true,
+    "reason": "Rule pass"
+  },
+  {
+    "ts": "2026-11-27T18:01:51.290439+00:00",
+    "lead": "Sadar Hospital Muzaffarpur",
+    "approved": true,
+    "reason": "Rule pass"
+  },
+  {
+    "ts": "2026-11-27T18:01:51.306105+00:00",
+    "lead": "PHC,Patedhi Belsar",
+    "approved": true,
+    "reason": "Rule pass"
+  },
+  {
+    "ts": "2026-11-27T18:01:51.323474+00:00",
+    "lead": "Referral Hospital, Khajechand Chhapra",
+    "approved": true,
+    "reason": "Rule pass"
   }
 ]
