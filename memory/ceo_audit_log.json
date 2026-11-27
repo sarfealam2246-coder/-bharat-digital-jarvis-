@@ -28,5 +28,29 @@
     "lead": "Smartway DIGITAL CLASSES",
     "approved": true,
     "reason": "Rule pass"
+  },
+  {
+    "ts": "2026-11-27T14:59:52.814886+00:00",
+    "lead": "Amrutha Multi-Speciality Hospital",
+    "approved": true,
+    "reason": "Rule pass"
+  },
+  {
+    "ts": "2026-11-27T14:59:52.838627+00:00",
+    "lead": "Balaji Hospital",
+    "approved": true,
+    "reason": "Rule pass"
+  },
+  {
+    "ts": "2026-11-27T14:59:52.864049+00:00",
+    "lead": "Naveed sounds and electrical works",
+    "approved": true,
+    "reason": "Rule pass"
+  },
+  {
+    "ts": "2026-11-27T14:59:52.886776+00:00",
+    "lead": "Satya Hospital",
+    "approved": true,
+    "reason": "Rule pass"
   }
 ]
