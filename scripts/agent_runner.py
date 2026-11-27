@@ -3,9 +3,10 @@ import imaplib
 import json
 import os
 import random
+import re
 import smtplib
 import time
-from datetime import datetime, timezone
+from datetime import datetime, timedelta, timezone
 from email.message import EmailMessage
 import requests
 
@@ -56,7 +57,7 @@ AGENT_1_CITIES = [
     ("Raipur", 21.2514, 81.6296),
 ]
 
-# Agent 2 Zone: South + East + North-East India + Online Gigs
+# Agent 2 Zone: South + East + North-East India + Fresh Online Gigs
 AGENT_2_CITIES = [
     ("Bengaluru", 12.9716, 77.5946),
     ("Mysuru", 12.2958, 76.6394),
@@ -86,18 +87,45 @@ OVERPASS_MIRRORS = [
     "https://maps.mail.ru/osm/tools/overpass/api/interpreter",
 ]
 
+GOVT_BLOCK_WORDS = [
+    "police", "government", "govt", "military", "army", "cantonment",
+    "post_office", "post office", "atm", "railway", "court", "municipal",
+    "nagar nigam", "collector", "tehsil", "blood_bank", "blood bank",
+    "fire_station", "prison", "embassy", "passport", "mee seva", "seva kendra",
+]
+
+
+def is_govt_or_blocked(name: str, cat: str) -> bool:
+    text = f"{name} {cat}".lower()
+    return any(w in text for w in GOVT_BLOCK_WORDS)
+
+
+def normalize_indian_mobile(raw_phone: str) -> str:
+    """Return 10-digit Indian mobile starting with 6/7/8/9 only (rejects 0755... landlines)."""
+    if not raw_phone:
+        return ""
+    first = re.split(r"[;/,]", raw_phone)[0]
+    digits = re.sub(r"\D", "", first)
+    if len(digits) == 12 and digits.startswith("91"):
+        digits = digits[2:]
+    elif len(digits) == 11 and digits.startswith("0"):
+        digits = digits[1:]
+    if len(digits) == 10 and digits[0] in ("6", "7", "8", "9"):
+        return digits
+    return ""
+
 
 def fetch_osm_leads(city: str, lat: float, lon: float) -> list[dict]:
-    """Fast 25km Overpass query filtering for phone/email + no website directly on server."""
+    """Fast 25km Overpass query filtering out existing websites, govt offices, and landlines."""
     query = f"""
     [out:json][timeout:18];
     (
-      nw["name"][!"website"]["phone"](around:25000,{lat},{lon});
-      nw["name"][!"website"]["contact:phone"](around:25000,{lat},{lon});
-      nw["name"][!"website"]["contact:mobile"](around:25000,{lat},{lon});
-      nw["name"][!"website"]["email"](around:25000,{lat},{lon});
+      nw["name"][!"website"][!"contact:website"][!"url"]["phone"](around:25000,{lat},{lon});
+      nw["name"][!"website"][!"contact:website"][!"url"]["contact:phone"](around:25000,{lat},{lon});
+      nw["name"][!"website"][!"contact:website"][!"url"]["contact:mobile"](around:25000,{lat},{lon});
+      nw["name"][!"website"][!"contact:website"][!"url"]["email"](around:25000,{lat},{lon});
     );
-    out center 35;
+    out center 40;
     """
     leads = []
     for mirror in OVERPASS_MIRRORS:
@@ -108,17 +136,20 @@ def fetch_osm_leads(city: str, lat: float, lon: float) -> list[dict]:
                 for el in elements:
                     tags = el.get("tags", {})
                     name = (tags.get("name") or "").strip()
-                    phone = (tags.get("phone") or tags.get("contact:phone") or tags.get("contact:mobile") or tags.get("mobile") or "").strip()
-                    mail = (tags.get("email") or tags.get("contact:email") or "").strip()
-                    if not name or (not phone and not mail):
+                    cat = (tags.get("amenity") or tags.get("shop") or tags.get("office") or tags.get("healthcare") or "business").strip()
+                    if not name or is_govt_or_blocked(name, cat):
                         continue
-                    cat = tags.get("amenity") or tags.get("shop") or tags.get("office") or tags.get("healthcare") or "business"
+                    raw_phone = (tags.get("phone") or tags.get("contact:phone") or tags.get("contact:mobile") or tags.get("mobile") or "").strip()
+                    mobile = normalize_indian_mobile(raw_phone)
+                    mail = (tags.get("email") or tags.get("contact:email") or "").strip()
+                    if not mobile and "@" not in mail:
+                        continue
                     leads.append({
-                        "source": "All-India Radar",
+                        "source": "All-India Mobile Radar",
                         "name": name,
                         "category": cat,
                         "city": city,
-                        "phone": phone,
+                        "phone": mobile,
                         "email": mail,
                         "slug": slugify(f"{name}-{city}"),
                     })
@@ -131,11 +162,12 @@ def fetch_osm_leads(city: str, lat: float, lon: float) -> list[dict]:
 
 
 def fetch_india_online_gigs() -> list[dict]:
-    """Fetch public web/freelance opportunities from non-blocked JSON APIs."""
+    """Fetch ONLY fresh (last 7 days) web/freelance opportunities — never 2-year-old posts."""
     leads = []
+    seven_days_ago = int(time.time()) - (7 * 86400)
     try:
         r = requests.get(
-            "https://hn.algolia.com/api/v1/search_by_date?query=freelance%20website&tags=story&hitsPerPage=8",
+            f"https://hn.algolia.com/api/v1/search_by_date?query=freelance%20website&tags=story&numericFilters=created_at_i>{seven_days_ago}&hitsPerPage=8",
             timeout=15,
         )
         if r.ok:
@@ -144,7 +176,7 @@ def fetch_india_online_gigs() -> list[dict]:
                 oid = hit.get("objectID", "")
                 if title and oid:
                     leads.append({
-                        "source": "HN Jobs/Web",
+                        "source": "Fresh HN Web Gigs (7d)",
                         "name": title[:65],
                         "category": "online_gig",
                         "city": "Online Global",
@@ -157,15 +189,22 @@ def fetch_india_online_gigs() -> list[dict]:
     except Exception:
         pass
 
+    cutoff = datetime.now(timezone.utc) - timedelta(days=14)
     try:
         r = requests.get("https://remotive.com/api/remote-jobs?category=software-dev&limit=8", timeout=15)
         if r.ok:
             for job in r.json().get("jobs", []):
+                pub = (job.get("publication_date") or "")[:10]
+                try:
+                    if pub and datetime.strptime(pub, "%Y-%m-%d").replace(tzinfo=timezone.utc) < cutoff:
+                        continue
+                except Exception:
+                    pass
                 title = f"{job.get('company_name', '')}: {job.get('title', '')}".strip(": ")
                 jid = job.get("id", "")
                 if title and jid:
                     leads.append({
-                        "source": "Remotive",
+                        "source": "Fresh Remotive (14d)",
                         "name": title[:65],
                         "category": "online_gig",
                         "city": "Remote",
@@ -273,7 +312,7 @@ def handle_apk_action(history: list, deals: list, base_pages_url: str):
             lead["amountInr"] = amount
             winning.setdefault("paidDeals", []).append({"name": lead["name"], "amount": amount, "ts": datetime.now(timezone.utc).isoformat()})
             if lead.get("email"):
-                send_gmail(lead["email"], f"Website Unlocked + UPI Payment (₹{amount})", f"Namaste! Aapki website unlock ho gayi hai: {lead['demoUrl']}\nUPI Payment Link: {pay_url}")
+                send_gmail(lead["email"], f"Website Unlocked + UPI Payment (₹{amount})", f"Namaste! Aapki website unlock ho gayi hai:\n{lead['demoUrl']}\nUPI Payment Link:\n{pay_url}")
 
     deal = next((d for d in deals if d.get("id") == target_id), None)
     if deal:
@@ -282,7 +321,7 @@ def handle_apk_action(history: list, deals: list, base_pages_url: str):
                 deal["status"] = "REPLIED"
         elif action == "approve_deal_upi":
             pay_url = build_upi_payment_page({"name": deal["sender"], "slug": slugify(deal["sender"])}, amount, upi_id, base_pages_url)
-            send_gmail(deal["sender"], f"Order Confirmed — UPI Payment ₹{amount}", f"Namaste! Aapki deal confirm ho gayi hai.\nUPI Payment Link: {pay_url}\nUPI ID: {upi_id}")
+            send_gmail(deal["sender"], f"Order Confirmed — UPI Payment ₹{amount}", f"Namaste! Aapki deal confirm ho gayi hai.\nUPI Payment Link:\n{pay_url}\nUPI ID: {upi_id}")
             deal["status"] = "PAID"
             deal["payUrl"] = pay_url
             deal["amountInr"] = amount
@@ -291,25 +330,6 @@ def handle_apk_action(history: list, deals: list, base_pages_url: str):
             deal["status"] = "CANCELLED"
 
     save_memory("winning_patterns.json", winning)
-
-
-def trigger_next_relay(current_shift: str):
-    pat = os.getenv("GH_AUTO_PAT", "").strip()
-    repo = os.getenv("GITHUB_REPOSITORY", "").strip()
-    enable_relay = os.getenv("ENABLE_RELAY", "true").lower() == "true"
-    if not pat or not repo or not enable_relay:
-        return
-    next_wf = "agent_2_relay.yml" if current_shift == "agent1" else "agent_1_relay.yml"
-    time.sleep(120)
-    try:
-        requests.post(
-            f"https://api.github.com/repos/{repo}/actions/workflows/{next_wf}/dispatches",
-            headers={"Authorization": f"Bearer {pat}", "Accept": "application/vnd.github+json"},
-            json={"ref": "main"},
-            timeout=15,
-        )
-    except Exception as exc:
-        print(f"Relay dispatch note: {exc}")
 
 
 def main():
@@ -359,22 +379,31 @@ def main():
         lead["marketRateInr"] = pricing["marketRateInr"]
 
         demo_info = build_demo_page(lead, base_pages_url, is_final=False)
+        demo_url = demo_info["demoUrl"]
+
         writer_res = run_department(
             "writer",
-            f"Business: {lead['name']} ({lead['city']}, {lead['category']})\nWork Scope: {pricing['workScope']}\nMarket Rate: {pricing['marketRateInr']}\nOur Offer Price: ₹{pricing['offerPriceInr']}\nLocked Demo URL: {demo_info['demoUrl']}\nReturn JSON: {{\"hindiSummary\": \"2-line Hindi summary mentioning what problem was solved and price\", \"clientMessage\": \"polite Hinglish pitch saying we already built their demo solution at {demo_info['demoUrl']}, market rate is {pricing['marketRateInr']}, our direct offer is ₹{pricing['offerPriceInr']} (open to discussion)\"}}",
-            "You are an Indian B2B sales writer. Return ONLY JSON.",
+            f"Business: {lead['name']} ({lead['city']}, {lead['category']})\nWork Scope: {pricing['workScope']}\nMarket Rate: {pricing['marketRateInr']}\nOur Offer Price: ₹{pricing['offerPriceInr']}\nReturn JSON: {{\"hindiSummary\": \"2-line Hindi summary mentioning what problem was solved and ₹{pricing['offerPriceInr']} price\", \"hookLine\": \"2-line strong polite Hindi opening showing we already built their demo and market rate is {pricing['marketRateInr']}, our direct offer is ₹{pricing['offerPriceInr']}\"}}",
+            "You are an Indian B2B sales writer. Return ONLY JSON. Do NOT include any URL in hookLine.",
             expect_json=True,
         ) or {}
-        hindi_summary = writer_res.get("hindiSummary") or f"{lead['city']} का {lead['name']} — बिना वेबसाइट का बिज़नेस, ₹{pricing['offerPriceInr']} ऑफर का डेमो तैयार है।"
-        pitch = writer_res.get("clientMessage") or f"नमस्ते {lead['name']} जी, मैंने देखा कि आपके {lead['category']} के लिए ऑनलाइन बुकिंग/वेबसाइट की कमी थी। मैंने आपके लिए पहले ही इसका डेमो हल तैयार कर दिया है: {demo_info['demoUrl']}। मार्केट में इसका खर्च {pricing['marketRateInr']} आता है, पर हम इसे ₹{pricing['offerPriceInr']} में आपके नंबर व QR के साथ लाइव कर देंगे।"
+        hindi_summary = writer_res.get("hindiSummary") or f"{lead['city']} का {lead['name']} — मोबाइल नंबर वेरिफाइड, ₹{pricing['offerPriceInr']} ऑफर का डेमो तैयार है।"
+        hook = (writer_res.get("hookLine") or f"नमस्ते {lead['name']} जी, मैंने देखा कि आपके {lead['category']} के लिए ऑनलाइन बुकिंग व वेबसाइट की कमी थी। मैंने आपके लिए पहले ही इसका डेमो हल तैयार कर दिया है।").strip()
 
-        audit = ceo_audit_outreach(lead, pitch, demo_info["demoUrl"])
+        pitch = (
+            f"{hook}\n\n"
+            f"👇 अपना सैंपल डेमो यहाँ देखें:\n"
+            f"{demo_url}\n\n"
+            f"मार्केट में इसका खर्च {pricing['marketRateInr']} आता है, पर हम इसे सिर्फ़ ₹{pricing['offerPriceInr']} में आपके असली WhatsApp नंबर व काउंटर QR कोड के साथ अनलॉक करके लाइव कर देंगे (फ्री होस्टिंग सहित; चाहें तो अपने नाम का .in डोमेन भी जुड़वा सकते हैं)। पसंद आए तो यहीं बताइए!"
+        )
+
+        audit = ceo_audit_outreach(lead, pitch, demo_url)
         if audit.get("approved", True):
             history.append({
                 **lead,
-                "demoUrl": demo_info["demoUrl"],
+                "demoUrl": demo_url,
                 "hindiSummary": hindi_summary,
-                "pitchMessage": audit.get("polishedMessage") or pitch,
+                "pitchMessage": pitch,
                 "status": "NEW",
                 "foundAt": datetime.now(timezone.utc).isoformat(),
             })
@@ -417,9 +446,6 @@ def main():
     save_memory("run_reports.json", reports[-60:])
     save_memory("live_status.json", live_status)
     print(f"RUN_REPORT_OK: {report_msg}")
-
-    if not os.getenv("APK_ACTION"):
-        trigger_next_relay(shift)
 
 
 if __name__ == "__main__":
