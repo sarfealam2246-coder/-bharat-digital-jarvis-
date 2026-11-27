@@ -76,5 +76,29 @@
     "lead": "Gateway",
     "approved": true,
     "reason": "Rule pass"
+  },
+  {
+    "ts": "2026-11-27T15:12:31.418201+00:00",
+    "lead": "Froth On Top",
+    "approved": true,
+    "reason": "Rule pass"
+  },
+  {
+    "ts": "2026-11-27T15:12:31.430065+00:00",
+    "lead": "Mallikatta Neuro Centre",
+    "approved": true,
+    "reason": "Rule pass"
+  },
+  {
+    "ts": "2026-11-27T15:12:31.443991+00:00",
+    "lead": "Silverbells Fancy & Stationery",
+    "approved": true,
+    "reason": "Rule pass"
+  },
+  {
+    "ts": "2026-11-27T15:12:31.455955+00:00",
+    "lead": "Girinivas",
+    "approved": true,
+    "reason": "Rule pass"
   }
 ]
