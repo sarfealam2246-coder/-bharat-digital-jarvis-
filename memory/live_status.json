@@ -1,12 +1,12 @@
 {
-  "lastRunAt": "2026-11-27T12:52:32.379142+00:00",
+  "lastRunAt": "2026-11-27T14:30:42.592976+00:00",
   "activeShift": "agent1",
-  "lastCity": "Varanasi",
+  "lastCity": "Patna, Noida, Meerut, Thane, Jabalpur, Jaipur, Nagpur, Gorakhpur, Surat, Muzaffarpur, Faridabad, Nashik",
   "newBuilt": 0,
   "newEmails": 0,
   "pendingOutbox": 0,
   "pendingDeals": 0,
   "totalEarnedInr": 0,
-  "jarvisScript": "नमस्ते सर, मैं जार्विस बोल रहा हूँ। अभी Varanasi की रिपोर्ट आई है। आज 0 नए बिज़नेस डेमो तैयार हुए हैं। आपके मैसेज बॉक्स में 0 क्लाइंट भेजने के लिए तैयार हैं, और 0 डील आपके हाँ या ना के इंतज़ार में हैं। अब तक कुल 0 रुपये की कमाई दर्ज हुई है।",
-  "statusText": "AGENT1 ने Varanasi में खोज की: 0 नए लॉक डेमो बने, 0 नए क्लाइंट ईमेल मिले। अभी भेजने के लिए 0 कार्ड तैयार हैं।"
+  "jarvisScript": "नमस्ते सर, मैं जार्विस बोल रहा हूँ। अभी AGENT1 ने Patna, Noida, Meerut, Thane, Jabalpur, Jaipur, Nagpur, Gorakhpur, Surat, Muzaffarpur, Faridabad, Nashik में खोज पूरी की। 0 नए बिज़नेस डेमो मार्केट रेट के हिसाब से तैयार हुए हैं। आपके संदेश बॉक्स में 0 क्लाइंट भेजने के लिए तैयार हैं, और 0 डील आपके हाँ या ना के इंतज़ार में हैं। अब तक कुल 0 रुपये की कमाई दर्ज हुई है।",
+  "statusText": "AGENT1 ने Patna, Noida, Meerut, Thane, Jabalpur, Jaipur, Nagpur, Gorakhpur, Surat, Muzaffarpur, Faridabad, Nashik में खोज की: 0 नए लॉक डेमो बने, 0 नए क्लाइंट ईमेल मिले। अभी भेजने के लिए 0 कार्ड तैयार हैं।"
 }
