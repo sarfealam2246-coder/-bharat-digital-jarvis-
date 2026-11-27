@@ -196,5 +196,29 @@
     "lead": "Mee seva govt office",
     "approved": true,
     "reason": "Rule pass"
+  },
+  {
+    "ts": "2026-11-27T15:53:55.413436+00:00",
+    "lead": "Good Luck Restaurant",
+    "approved": true,
+    "reason": "Rule pass"
+  },
+  {
+    "ts": "2026-11-27T15:53:55.425476+00:00",
+    "lead": "J Hearsch and Co",
+    "approved": true,
+    "reason": "Rule pass"
+  },
+  {
+    "ts": "2026-11-27T15:53:55.437465+00:00",
+    "lead": "Bademiya Seekh Kebab Stall",
+    "approved": true,
+    "reason": "Rule pass"
+  },
+  {
+    "ts": "2026-11-27T15:53:55.447562+00:00",
+    "lead": "Ankur",
+    "approved": true,
+    "reason": "Rule pass"
   }
 ]
