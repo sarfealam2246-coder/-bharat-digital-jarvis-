@@ -24,11 +24,11 @@
     "summary": "AGENT1 ने Bhopal में खोज की: 4 नए लॉक डेमो बने, 0 नए क्लाइंट ईमेल मिले। अभी भेजने के लिए 4 कार्ड तैयार हैं।"
   },
   {
-    "ts": "2026-11-27T14:59:52.887498+00:00",
-    "shift": "agent2",
-    "city": "Bengaluru, Tirupati, Guwahati, Warangal",
+    "ts": "2026-11-27T15:03:13.135921+00:00",
+    "shift": "agent1",
+    "city": "Rajkot",
     "built": 4,
     "emails": 0,
-    "summary": "AGENT2 ने Bengaluru, Tirupati, Guwahati, Warangal में खोज की: 4 नए लॉक डेमो बने, 0 नए क्लाइंट ईमेल मिले। अभी भेजने के लिए 8 कार्ड तैयार हैं।"
+    "summary": "AGENT1 ने Rajkot में खोज की: 4 नए लॉक डेमो बने, 0 नए क्लाइंट ईमेल मिले। अभी भेजने के लिए 8 कार्ड तैयार हैं।"
   }
 ]
