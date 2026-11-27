@@ -45,14 +45,14 @@
     "city": "Noida",
     "built": 4,
     "emails": 0,
-    "summary": "AGENT2 ने Thiruvananthapuram, Mangaluru में खोज की: 4 नए लॉक डेमो बने, 0 नए क्लाइंट ईमेल मिले। अभी भेजने के लिए 16 कार्ड तैयार हैं।"
+    "summary": "AGENT1 ने Noida में खोज की: 4 नए लॉक डेमो बने, 0 नए क्लाइंट ईमेल मिले। अभी भेजने के लिए 16 कार्ड तैयार हैं।"
   },
   {
-    "ts": "2026-11-27T15:18:32.000815+00:00",
-    "shift": "agent2",
-    "city": "Vijayawada",
+    "ts": "2026-11-27T15:22:02.473956+00:00",
+    "shift": "agent1",
+    "city": "Kanpur, Bhopal, Ahmedabad",
     "built": 4,
     "emails": 0,
-    "summary": "AGENT2 ने Vijayawada में खोज की: 4 नए लॉक डेमो बने, 0 नए क्लाइंट ईमेल मिले। अभी भेजने के लिए 19 कार्ड तैयार हैं।"
+    "summary": "AGENT1 ने Kanpur, Bhopal, Ahmedabad में खोज की: 4 नए लॉक डेमो बने, 0 नए क्लाइंट ईमेल मिले। अभी भेजने के लिए 20 कार्ड तैयार हैं।"
   }
 ]
