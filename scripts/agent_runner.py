@@ -80,67 +80,103 @@ AGENT_2_CITIES = [
     ("Guwahati", 26.1445, 91.7362),
 ]
 
+OVERPASS_MIRRORS = [
+    "https://overpass-api.de/api/interpreter",
+    "https://overpass.kumi.systems/api/interpreter",
+    "https://maps.mail.ru/osm/tools/overpass/api/interpreter",
+]
+
 
 def fetch_osm_leads(city: str, lat: float, lon: float) -> list[dict]:
-    """Scan 55km radius across nodes, ways & relations (nwr) for businesses without a website."""
+    """Fast 25km Overpass query filtering for phone/email + no website directly on server."""
     query = f"""
-    [out:json][timeout:30];
+    [out:json][timeout:18];
     (
-      nwr["amenity"~"clinic|doctors|dentist|hospital|restaurant|cafe|school|college|coaching"](around:55000,{lat},{lon})["name"][!"website"];
-      nwr["shop"~"beauty|hairdresser|electronics|mobile_phone|jewelry|car|motorcycle|furniture|supermarket"](around:55000,{lat},{lon})["name"][!"website"];
-      nwr["office"~"estate_agent|lawyer|accountant|insurance"](around:55000,{lat},{lon})["name"][!"website"];
+      nw["name"][!"website"]["phone"](around:25000,{lat},{lon});
+      nw["name"][!"website"]["contact:phone"](around:25000,{lat},{lon});
+      nw["name"][!"website"]["contact:mobile"](around:25000,{lat},{lon});
+      nw["name"][!"website"]["email"](around:25000,{lat},{lon});
     );
-    out center 50;
+    out center 35;
     """
     leads = []
-    try:
-        r = requests.post("https://overpass-api.de/api/interpreter", data={"data": query}, timeout=35)
-        if r.ok:
-            for el in r.json().get("elements", []):
-                tags = el.get("tags", {})
-                name = (tags.get("name") or "").strip()
-                phone = (tags.get("phone") or tags.get("contact:phone") or tags.get("mobile") or "").strip()
-                mail = (tags.get("email") or tags.get("contact:email") or "").strip()
-                if not name or (not phone and not mail):
-                    continue
-                cat = tags.get("amenity") or tags.get("shop") or tags.get("office") or "business"
-                leads.append({
-                    "source": "All-India 55km Radar",
-                    "name": name,
-                    "category": cat,
-                    "city": city,
-                    "phone": phone,
-                    "email": mail,
-                    "slug": slugify(f"{name}-{city}"),
-                })
-    except Exception as exc:
-        print(f"OSM note ({city}): {exc}")
+    for mirror in OVERPASS_MIRRORS:
+        try:
+            r = requests.post(mirror, data={"data": query}, timeout=20)
+            if r.ok:
+                elements = r.json().get("elements", [])
+                for el in elements:
+                    tags = el.get("tags", {})
+                    name = (tags.get("name") or "").strip()
+                    phone = (tags.get("phone") or tags.get("contact:phone") or tags.get("contact:mobile") or tags.get("mobile") or "").strip()
+                    mail = (tags.get("email") or tags.get("contact:email") or "").strip()
+                    if not name or (not phone and not mail):
+                        continue
+                    cat = tags.get("amenity") or tags.get("shop") or tags.get("office") or tags.get("healthcare") or "business"
+                    leads.append({
+                        "source": "All-India Radar",
+                        "name": name,
+                        "category": cat,
+                        "city": city,
+                        "phone": phone,
+                        "email": mail,
+                        "slug": slugify(f"{name}-{city}"),
+                    })
+                if leads:
+                    return leads
+        except Exception as exc:
+            print(f"OSM mirror ({mirror}, {city}): {exc}")
+            continue
     return leads
 
 
 def fetch_india_online_gigs() -> list[dict]:
+    """Fetch public web/freelance opportunities from non-blocked JSON APIs."""
     leads = []
-    for sub in ["FreelanceIndia", "FreelanceIndiaa", "forhire", "smallbusiness"]:
-        try:
-            r = requests.get(f"https://www.reddit.com/r/{sub}/new.json?limit=18", headers={"User-Agent": "BharatDigitalJarvis/2.0"}, timeout=15)
-            if r.ok:
-                for ch in r.json().get("data", {}).get("children", []):
-                    d = ch.get("data", {})
-                    title = (d.get("title") or "").strip()
-                    if any(w in title.lower() for w in ["[hiring]", "need", "looking", "website", "landing", "app", "excel", "poster", "menu", "clinic"]):
-                        leads.append({
-                            "source": f"r/{sub}",
-                            "name": title[:65],
-                            "category": "online_gig",
-                            "city": "India Online",
-                            "phone": "",
-                            "email": "",
-                            "customRequest": (d.get("selftext") or title)[:220],
-                            "postUrl": f"https://www.reddit.com{d.get('permalink', '')}",
-                            "slug": slugify(f"gig-{d.get('id', 'x')}"),
-                        })
-        except Exception:
-            continue
+    try:
+        r = requests.get(
+            "https://hn.algolia.com/api/v1/search_by_date?query=freelance%20website&tags=story&hitsPerPage=8",
+            timeout=15,
+        )
+        if r.ok:
+            for hit in r.json().get("hits", []):
+                title = (hit.get("title") or "").strip()
+                oid = hit.get("objectID", "")
+                if title and oid:
+                    leads.append({
+                        "source": "HN Jobs/Web",
+                        "name": title[:65],
+                        "category": "online_gig",
+                        "city": "Online Global",
+                        "phone": "",
+                        "email": "",
+                        "customRequest": title,
+                        "postUrl": hit.get("url") or f"https://news.ycombinator.com/item?id={oid}",
+                        "slug": slugify(f"hn-{oid}"),
+                    })
+    except Exception:
+        pass
+
+    try:
+        r = requests.get("https://remotive.com/api/remote-jobs?category=software-dev&limit=8", timeout=15)
+        if r.ok:
+            for job in r.json().get("jobs", []):
+                title = f"{job.get('company_name', '')}: {job.get('title', '')}".strip(": ")
+                jid = job.get("id", "")
+                if title and jid:
+                    leads.append({
+                        "source": "Remotive",
+                        "name": title[:65],
+                        "category": "online_gig",
+                        "city": "Remote",
+                        "phone": "",
+                        "email": "",
+                        "customRequest": title,
+                        "postUrl": job.get("url", ""),
+                        "slug": slugify(f"rem-{jid}"),
+                    })
+    except Exception:
+        pass
     return leads
 
 
@@ -295,7 +331,7 @@ def main():
     fresh = []
     scanned_cities = []
 
-    for city, lat, lon in zone_cities[:12]:
+    for city, lat, lon in zone_cities[:8]:
         scanned_cities.append(city)
         for item in fetch_osm_leads(city, lat, lon):
             ph = item.get("phone", "")
