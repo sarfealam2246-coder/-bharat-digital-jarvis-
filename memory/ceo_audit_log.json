@@ -460,5 +460,29 @@
     "lead": "Referral Hospital, Khajechand Chhapra",
     "approved": true,
     "reason": "Rule pass"
+  },
+  {
+    "ts": "2026-11-27T18:03:37.333913+00:00",
+    "lead": "Pine Tree Lodge",
+    "approved": true,
+    "reason": "Rule pass"
+  },
+  {
+    "ts": "2026-11-27T18:03:37.350602+00:00",
+    "lead": "Cafe Coffee Day",
+    "approved": true,
+    "reason": "Rule pass"
+  },
+  {
+    "ts": "2026-11-27T18:03:37.367137+00:00",
+    "lead": "The Great Indian Pub",
+    "approved": true,
+    "reason": "Rule pass"
+  },
+  {
+    "ts": "2026-11-27T18:03:37.383974+00:00",
+    "lead": "SPARC PVT LTD",
+    "approved": true,
+    "reason": "Rule pass"
   }
 ]

@@ -1,12 +1,12 @@
 {
-  "lastRunAt": "2026-11-27T18:02:04.014538+00:00",
+  "lastRunAt": "2026-11-27T18:03:43.157667+00:00",
   "activeShift": "agent1",
-  "lastCity": "Agra, Udaipur, Dehradun, Muzaffarpur",
+  "lastCity": "Gurugram, Dehradun",
   "newBuilt": 4,
   "newEmails": 0,
-  "pendingOutbox": 15,
+  "pendingOutbox": 18,
   "pendingDeals": 0,
   "totalEarnedInr": 0,
-  "jarvisScript": "नमस्ते सर, मैं जार्विस बोल रहा हूँ। अभी AGENT1 ने Agra, Udaipur, Dehradun, Muzaffarpur में खोज पूरी की। 4 नए बिज़नेस डेमो मार्केट रेट के हिसाब से तैयार हुए हैं। आपके संदेश बॉक्स में 15 क्लाइंट भेजने के लिए तैयार हैं, और 0 डील आपके हाँ या ना के इंतज़ार में हैं। अब तक कुल 0 रुपये की कमाई दर्ज हुई है।",
-  "statusText": "AGENT1 ने Agra, Udaipur, Dehradun, Muzaffarpur में खोज की: 4 नए लॉक डेमो बने, 0 नए क्लाइंट ईमेल मिले। अभी भेजने के लिए 15 कार्ड तैयार हैं।"
+  "jarvisScript": "नमस्ते सर, मैं जार्विस बोल रहा हूँ। अभी AGENT1 ने Gurugram, Dehradun में खोज पूरी की। 4 नए बिज़नेस डेमो मार्केट रेट के हिसाब से तैयार हुए हैं। आपके संदेश बॉक्स में 18 क्लाइंट भेजने के लिए तैयार हैं, और 0 डील आपके हाँ या ना के इंतज़ार में हैं। अब तक कुल 0 रुपये की कमाई दर्ज हुई है।",
+  "statusText": "AGENT1 ने Gurugram, Dehradun में खोज की: 4 नए लॉक डेमो बने, 0 नए क्लाइंट ईमेल मिले। अभी भेजने के लिए 18 कार्ड तैयार हैं।"
 }
