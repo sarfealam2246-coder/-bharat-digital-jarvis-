@@ -1,29 +1,5 @@
 [
   {
-    "ts": "2026-11-27T14:50:03.436525+00:00",
-    "lead": "Manisha Hospital",
-    "approved": true,
-    "reason": "Rule pass"
-  },
-  {
-    "ts": "2026-11-27T14:50:03.452698+00:00",
-    "lead": "Hari OM Sweets",
-    "approved": true,
-    "reason": "Rule pass"
-  },
-  {
-    "ts": "2026-11-27T14:50:03.468885+00:00",
-    "lead": "Ram jewellers",
-    "approved": true,
-    "reason": "Rule pass"
-  },
-  {
-    "ts": "2026-11-27T14:50:03.484983+00:00",
-    "lead": "Smartway DIGITAL CLASSES",
-    "approved": true,
-    "reason": "Rule pass"
-  },
-  {
     "ts": "2026-11-27T15:03:13.085027+00:00",
     "lead": "Galaxy Hotel",
     "approved": true,
@@ -596,6 +572,30 @@
   {
     "ts": "2026-11-28T00:23:22.872038+00:00",
     "lead": "Keshav Restaurant",
+    "approved": true,
+    "reason": "Rule pass"
+  },
+  {
+    "ts": "2026-11-28T00:38:27.290739+00:00",
+    "lead": "Astoria",
+    "approved": true,
+    "reason": "Rule pass"
+  },
+  {
+    "ts": "2026-11-28T00:38:27.306993+00:00",
+    "lead": "Angaara",
+    "approved": true,
+    "reason": "Rule pass"
+  },
+  {
+    "ts": "2026-11-28T00:38:27.323161+00:00",
+    "lead": "Telecom Nagar",
+    "approved": true,
+    "reason": "Rule pass"
+  },
+  {
+    "ts": "2026-11-28T00:38:27.338982+00:00",
+    "lead": "Vijaya Dairy Store",
     "approved": true,
     "reason": "Rule pass"
   }
