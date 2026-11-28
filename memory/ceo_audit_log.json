@@ -1,11 +1,5 @@
 [
   {
-    "ts": "2026-11-27T09:53:24.304724+00:00",
-    "lead": "Verma Dental Clinic",
-    "approved": true,
-    "reason": "Rule pass"
-  },
-  {
     "ts": "2026-11-27T14:50:03.436525+00:00",
     "lead": "Manisha Hospital",
     "approved": true,
@@ -578,6 +572,30 @@
   {
     "ts": "2026-11-27T20:02:29.765858+00:00",
     "lead": "TDW Furniture Private Limited",
+    "approved": true,
+    "reason": "Rule pass"
+  },
+  {
+    "ts": "2026-11-28T00:23:22.819198+00:00",
+    "lead": "Frameszon",
+    "approved": true,
+    "reason": "Rule pass"
+  },
+  {
+    "ts": "2026-11-28T00:23:22.838330+00:00",
+    "lead": "Goyal Books Overseas Pvt. Ltd.",
+    "approved": true,
+    "reason": "Rule pass"
+  },
+  {
+    "ts": "2026-11-28T00:23:22.855123+00:00",
+    "lead": "Hira Sweets",
+    "approved": true,
+    "reason": "Rule pass"
+  },
+  {
+    "ts": "2026-11-28T00:23:22.872038+00:00",
+    "lead": "Keshav Restaurant",
     "approved": true,
     "reason": "Rule pass"
   }
